@@ -50,7 +50,7 @@ const useStyles = makeStyles((theme) => ({
     },
     TabWrapper: {
         fontSize: 'larger',
-        marginTop: '0.2em'
+        marginTop: '0.35em'
     },
     TabsIndicator: {
         backgroundColor: 'white'
@@ -58,6 +58,9 @@ const useStyles = makeStyles((theme) => ({
     TabsFlexContainer: {
         justifyContent: 'center',
         alignItems: 'center',
+    },
+    Tab: {
+        textTransform: 'none'
     },
     login: {
         height: '4.6em'
@@ -72,7 +75,7 @@ function Header(props) {
         wrapper: classes.TabWrapper
     };
 
-    const [tabIndex, setTabIndex] = React.useState(-1);
+    const [tabIndex, setTabIndex] = React.useState(false);
 
     const goTo = (path) => {
         if (history.location.pathname !== path)
@@ -103,13 +106,13 @@ function Header(props) {
     };
 
     const homeButtonClick = () => {
-        setTabIndex(-1);
+        setTabIndex(false);
         goTo(Routes.HomePage.pathname);
     };
 
     return (
         <div className={classes.root}>
-            <AppBar position="static">
+            <AppBar position="static" color="primary">
                 <Toolbar>
                     <IconButton edge="start" className={classes.homeButton} color="inherit" aria-label="menu"
                         onClick={homeButtonClick} disableRipple disableTouchRipple>
@@ -129,14 +132,19 @@ function Header(props) {
                             }}
                             centered>
                             <Tab disableRipple label="Hall"
+                                className={classes.Tab}
                                 classes={TabClasses} />
                             <Tab disableRipple label="Shop"
+                                className={classes.Tab}
                                 classes={TabClasses} />
                             <Tab disableRipple label="Settings"
+                                className={classes.Tab}
                                 classes={TabClasses} />
                             <Tab disableRipple label="Credits"
+                                className={classes.Tab}
                                 classes={TabClasses} />
                             <Tab disableRipple label="Contact us"
+                                className={classes.Tab}
                                 classes={TabClasses} />
                         </Tabs>
                     </div>
