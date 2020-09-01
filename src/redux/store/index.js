@@ -1,8 +1,10 @@
 import { createStore, combineReducers } from 'redux';
 import HallPageReducer from '../../components/HallPage/HallPageReducer';
+import CreateTableDialogReducer from '../../components/CreateTableDialog/CreateTableDialogReducer';
 
 const reducers = combineReducers({
-  HallPageReducer
+  HallPageReducer,
+  CreateTableDialogReducer
 });
 
 const store = createStore(reducers);

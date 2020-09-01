@@ -9,9 +9,11 @@ import ShopPage from '../ShopPage/ShopPage';
 import SettingsPage from '../SettingsPage/SettingsPage';
 import CreditsPage from '../CreditsPage/CreditsPage';
 import ContactUsPage from '../ContactUsPage/ContactUsPage';
+import Footer from '../Footer/Footer';
 import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { useDispatch } from 'react-redux';
 import { initFirebaseRedux } from '../../libs/firebaseRedux';
+import CreateTableDialog from '../CreateTableDialog/CreateTableDialog';
 
 const history = createBrowserHistory();
 const theme = createMuiTheme(Theme);
@@ -26,6 +28,7 @@ function App() {
     return (
         <BrowserRouter>
             <ThemeProvider theme={theme}>
+                <CreateTableDialog />
                 <Router history={history}>
                     <Header history={history} />
                     <Switch>
@@ -36,6 +39,7 @@ function App() {
                         <Route exact path={Routes.CreditsPage.pathname} component={CreditsPage} />
                         <Route exact path={Routes.ContactUsPage.pathname} component={ContactUsPage} />
                     </Switch>
+                    <Footer />
                 </Router>
             </ThemeProvider>
         </BrowserRouter>

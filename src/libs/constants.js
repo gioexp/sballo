@@ -23,3 +23,5 @@ export const Theme = {
         }
     }
 };
+
+export const TABLENAME_MAX_LENGTH = 30;

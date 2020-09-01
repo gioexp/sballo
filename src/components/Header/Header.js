@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
@@ -75,7 +75,7 @@ function Header(props) {
         wrapper: classes.TabWrapper
     };
 
-    const [tabIndex, setTabIndex] = React.useState(false);
+    const [tabIndex, setTabIndex] = useState(false);
 
     const goTo = (path) => {
         if (history.location.pathname !== path)
