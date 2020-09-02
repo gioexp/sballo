@@ -31,7 +31,7 @@ const useStyles = makeStyles((theme) => ({
 
 function HallPage() {
     const classes = useStyles();
-    const speed = useSelector(state => state.HallPageReducer.speed);
+    const tables = useSelector(state => state.HallPageReducer.tables);
     const dispatch = useDispatch();
 
     const addButtonClick = () => {
@@ -40,6 +40,7 @@ function HallPage() {
 
     return (
         <div className={classes.root}>
+            {tables && <div>{Object.values(tables)[0].name}</div>}
             <Button variant="outlined" color="primary" className={classes.addButton}
                 onClick={addButtonClick} >
                 <AddIcon fontSize="large" />

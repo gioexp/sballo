@@ -1,4 +1,4 @@
-export const setSpeed = data => ({
-    type: 'SET_SPEED',
-    payload: { speed: data }
+export const setTables = data => ({
+    type: 'SET_TABLES',
+    payload: { tables: data }
 });

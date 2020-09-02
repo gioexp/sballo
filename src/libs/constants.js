@@ -24,4 +24,5 @@ export const Theme = {
     }
 };
 
+export const TABLENAME_MIN_LENGTH = 5;
 export const TABLENAME_MAX_LENGTH = 30;
