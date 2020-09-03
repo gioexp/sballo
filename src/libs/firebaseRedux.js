@@ -9,7 +9,9 @@ export const initFirebaseRedux = (dispatch) => {
 
     const rootRef = firebase.database().ref();
     rootRef.child('tables').on('value', snap => {
-        dispatch(setTables(snap.val()));
+        let newVal = snap.val();
+        if (newVal) dispatch(setTables(newVal));
+        else dispatch(setTables({}));
     });
 }
 
@@ -19,5 +21,5 @@ export const insertFirebase = (child, data) => {
     let id = childRef.push().key;
     let newTable = {};
     newTable[id] = data;
-    childRef.update(newTable);
+    return childRef.update(newTable);
 }

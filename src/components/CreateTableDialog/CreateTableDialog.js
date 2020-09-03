@@ -1,27 +1,20 @@
 import React, { useState } from 'react';
-import Button from '@material-ui/core/Button';
-import Dialog from '@material-ui/core/Dialog';
-import DialogActions from '@material-ui/core/DialogActions';
-import DialogContent from '@material-ui/core/DialogContent';
-import DialogTitle from '@material-ui/core/DialogTitle';
-import Slide from '@material-ui/core/Slide';
+import {
+    Button, Dialog, DialogActions, DialogContent, DialogTitle, Slide, TextField, FormControl, FormGroup, FormControlLabel,
+    FormHelperText, FormLabel, Checkbox, LinearProgress
+} from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleCreateTableDialog } from './CreateTableDialogAction';
 import { makeStyles } from '@material-ui/core/styles';
-import TextField from '@material-ui/core/TextField';
 import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH } from '../../libs/constants';
-import FormControl from '@material-ui/core/FormControl';
-import FormGroup from '@material-ui/core/FormGroup';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import FormHelperText from '@material-ui/core/FormHelperText';
-import FormLabel from '@material-ui/core/FormLabel';
-import Checkbox from '@material-ui/core/Checkbox';
 import clsx from 'clsx';
 import { insertFirebase } from '../../libs/firebaseRedux';
+import moment from 'moment';
+import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 
 const useStyles = makeStyles((theme) => ({
     title: {
-        color: theme.palette.primary.main
+        color: theme.palette.primary.main,
     },
     actionButton: {
         textTransform: 'none'
@@ -44,6 +37,9 @@ const useStyles = makeStyles((theme) => ({
     checkBoxesLabel: {
         marginTop: '0.79em',
         paddingRight: '2.5em'
+    },
+    loadingBar: {
+        width: '100%',
     }
 }));
 
@@ -59,6 +55,7 @@ function CreateTableDialog() {
     const [players, setPlayers] = useState(4);
     const [timeToPlay, setTimeToPlay] = useState(45);
     const [bet, setBet] = useState(0);
+    const [loading, setLoading] = useState(false);
 
     const playersValues = [2, 3, 4, 5, 6, 7];
     const timeValues = [15, 30, 45, 60];
@@ -73,14 +70,31 @@ function CreateTableDialog() {
     };
 
     const handleCreate = () => {
+        setLoading(true);
         let newTable = {
+            timestamp: moment.utc().toString(),
+            type: 'sballo',
             name: tableName,
             bet: bet,
             timePlay: timeToPlay,
-            players: players
+            players: players,
+            author: 'gioexp'  // here the creator username
         };
-        insertFirebase('tables', newTable);
-        dispatch(toggleCreateTableDialog(false));
+        insertFirebase('tables', newTable)
+            .then(result => {
+                dispatch(setSnackbarMessage('Table created! Good luck!'));
+                dispatch(setSnackbarSeverity('success'));
+                dispatch(toggleSnackbarOpen(true));
+                dispatch(toggleCreateTableDialog(false));
+                setLoading(false);
+            })
+            .catch(error => {
+                dispatch(setSnackbarMessage('Error while creating table. Retry later...'));
+                dispatch(setSnackbarSeverity('error'));
+                dispatch(toggleSnackbarOpen(true));
+                dispatch(toggleCreateTableDialog(false));
+                setLoading(false);
+            });
     };
 
     const handlePlayersChange = (event) => {
@@ -100,7 +114,12 @@ function CreateTableDialog() {
                 onClose={handleClose}
                 fullWidth={true}
                 maxWidth={'sm'}>
-                <DialogTitle className={classes.title}>{"Create Sballo table"}</DialogTitle>
+                <DialogTitle className={classes.title}>
+                    <div>
+                        {"Create Sballo table"}
+                        {loading && <LinearProgress className={classes.loadingBar} />}
+                    </div>
+                </DialogTitle>
                 <DialogContent>
                     <FormControl required error={tableNameFormError} component="fieldset" className={clsx(classes.formControl, classes.marginBottom)} >
                         <FormControlLabel className={classes.textField} control={
@@ -175,7 +194,7 @@ function CreateTableDialog() {
                         Cancel
                     </Button>
                     <Button className={classes.actionButton} onClick={handleCreate} color="primary"
-                        disabled={tableNameFormError || betFormError || playersFormError || timeFormError}>
+                        disabled={loading || tableNameFormError || betFormError || playersFormError || timeFormError}>
                         Create
                     </Button>
                 </DialogActions>

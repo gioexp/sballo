@@ -14,6 +14,7 @@ import { ThemeProvider, createMuiTheme } from '@material-ui/core/styles';
 import { useDispatch } from 'react-redux';
 import { initFirebaseRedux } from '../../libs/firebaseRedux';
 import CreateTableDialog from '../CreateTableDialog/CreateTableDialog';
+import Snackbar from '../Snackbar/Snackbar';
 
 const history = createBrowserHistory();
 const theme = createMuiTheme(Theme);
@@ -29,6 +30,7 @@ function App() {
         <BrowserRouter>
             <ThemeProvider theme={theme}>
                 <CreateTableDialog />
+                <Snackbar />
                 <Router history={history}>
                     <Header history={history} />
                     <Switch>

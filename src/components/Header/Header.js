@@ -1,16 +1,9 @@
 import React, { useState } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
-import AppBar from '@material-ui/core/AppBar';
-import Toolbar from '@material-ui/core/Toolbar';
-import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
-import IconButton from '@material-ui/core/IconButton';
-import AttachMoneyIcon from '@material-ui/icons/AttachMoney';
-import AlternateEmailIcon from '@material-ui/icons/AlternateEmail';
-import SyncAltIcon from '@material-ui/icons/SyncAlt';
+import { AppBar, Toolbar, Typography, Button, IconButton, Tabs, Tab } from '@material-ui/core';
+import { AttachMoney, AlternateEmail, SyncAlt } from '@material-ui/icons';
 import { Routes } from '../../libs/constants';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
+
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -117,10 +110,10 @@ function Header(props) {
                     <IconButton edge="start" className={classes.homeButton} color="inherit" aria-label="menu"
                         onClick={homeButtonClick} disableRipple disableTouchRipple>
                         <div className={classes.homeButtonDiv}>
-                            <AttachMoneyIcon fontSize="large" />
+                            <AttachMoney fontSize="large" />
                             <Typography variant="h6" className={classes.bLetter}>b</Typography>
-                            <AlternateEmailIcon fontSize="small" className={classes.AlternateEmailIcon} />
-                            <SyncAltIcon fontSize="default" className={classes.SyncAltIcon} />
+                            <AlternateEmail fontSize="small" className={classes.AlternateEmailIcon} />
+                            <SyncAlt fontSize="default" className={classes.SyncAltIcon} />
                             <Typography variant="h6" className={classes.oLetter}>o</Typography>
                         </div>
                     </IconButton>
