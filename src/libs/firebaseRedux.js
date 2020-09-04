@@ -23,3 +23,15 @@ export const insertFirebase = (child, data) => {
     newTable[id] = data;
     return childRef.update(newTable);
 }
+
+export const updateTableParticipantsFirebase = (id, userId, players) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id + '/participants');
+    return childRef.transaction(function update(participants) {
+        if (participants) {
+            if(participants.length < players) participants.push(userId);
+            else return;  // abort transaction
+        }
+        return participants;
+    });
+}

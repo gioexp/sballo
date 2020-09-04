@@ -15,6 +15,8 @@ import { useDispatch } from 'react-redux';
 import { initFirebaseRedux } from '../../libs/firebaseRedux';
 import CreateTableDialog from '../CreateTableDialog/CreateTableDialog';
 import Snackbar from '../Snackbar/Snackbar';
+import TableConfirmDialog from '../TableConfirmDialog/TableConfirmDialog';
+import LoginDialog from '../LoginDialog/LoginDialog';
 
 const history = createBrowserHistory();
 const theme = createMuiTheme(Theme);
@@ -29,7 +31,9 @@ function App() {
     return (
         <BrowserRouter>
             <ThemeProvider theme={theme}>
+                <LoginDialog />
                 <CreateTableDialog />
+                <TableConfirmDialog />
                 <Snackbar />
                 <Router history={history}>
                     <Header history={history} />

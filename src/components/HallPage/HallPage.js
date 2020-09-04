@@ -6,8 +6,11 @@ import {
     Button, List, ListItem, ListItemText, Divider, CircularProgress, ListItemIcon, ListItemSecondaryAction,
     Typography
 } from '@material-ui/core';
-import { AttachMoney, Add } from '@material-ui/icons';
+import { AttachMoney, Add, CheckCircle } from '@material-ui/icons';
 import moment from 'moment';
+import { toggleTableConfirmDialog, setTableConfirmDialogId } from '../TableConfirmDialog/TableConfirmDialogAction';
+import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
+import { green } from '@material-ui/core/colors';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -45,15 +48,26 @@ const useStyles = makeStyles((theme) => ({
         color: 'rgba(0, 0, 0, 0.54)',
     },
     betDiv: {
+        marginTop: '0.25em',
         marginRight: '3em',
-        marginTop: '0.25em'
     },
     playersDiv: {
+        marginTop: '0.25em',
+        marginRight: '3em',
+    },
+    timePlayDiv: {
         marginTop: '0.25em',
         marginRight: '6em',
     },
     createdDiv: {
         marginTop: '0.25em'
+    },
+    checkIconDiv:{
+        marginTop: '0.6em',
+        marginRight: '3em',
+    },
+    checkIcon: {
+        color: green[500]
     }
 }));
 
@@ -63,10 +77,6 @@ function HallPage() {
     const dispatch = useDispatch();
     const [actualTime, setActualTime] = useState(moment());
 
-    const addButtonClick = () => {
-        dispatch(toggleCreateTableDialog(true));
-    }
-
     useEffect(() => {
         const interval = setInterval(() => {
             setActualTime(moment());
@@ -74,13 +84,29 @@ function HallPage() {
         return () => clearInterval(interval);
     }, []);
 
+    const addButtonClick = () => {
+        dispatch(toggleCreateTableDialog(true));
+    }
+
+    const openTableConfirm = (key, table) => {
+        if (table.participants.length < table.players) {
+            dispatch(setTableConfirmDialogId(key));
+            dispatch(toggleTableConfirmDialog(true));
+        }
+        else {
+            dispatch(setSnackbarMessage('Table is full. Try with another one.'));
+            dispatch(setSnackbarSeverity('warning'));
+            dispatch(toggleSnackbarOpen(true));
+        }
+    }
+
     return (
         <div className={classes.root}>
             {tables &&
                 <List className={classes.list}>
                     {Object.entries(tables).map(([key, table]) => (
                         <div key={key}>
-                            <ListItem button>
+                            <ListItem button onClick={() => openTableConfirm(key, table)}>
                                 <ListItemIcon>
                                     <AttachMoney fontSize='large' color='primary' />
                                 </ListItemIcon>
@@ -88,7 +114,11 @@ function HallPage() {
                                     primary={table.name}
                                     secondary={'made by: ' + table.author}
                                 />
-                                <ListItemSecondaryAction className={classes.secondaryAction}>
+                                <ListItemSecondaryAction className={classes.secondaryAction} button onClick={() => openTableConfirm(key, table)}>
+                                    {/* this is visible only if player joined table */}
+                                    <div className={classes.checkIconDiv}>
+                                        <CheckCircle fontSize='large' className={classes.checkIcon} />
+                                    </div>
                                     <div className={classes.betDiv}>
                                         <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
                                             bet
@@ -102,7 +132,15 @@ function HallPage() {
                                             players
                                     </Typography>
                                         <Typography variant="body1" color="inherit" align="center">
-                                            {table.players}
+                                            {table.participants.length + ' / ' + table.players}
+                                        </Typography>
+                                    </div>
+                                    <div className={classes.timePlayDiv}>
+                                        <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
+                                            play time
+                                    </Typography>
+                                        <Typography variant="body1" color="inherit" align="center">
+                                            {table.timePlay + '\'\''}
                                         </Typography>
                                     </div>
                                     <div className={classes.createdDiv}>

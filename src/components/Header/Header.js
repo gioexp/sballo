@@ -3,7 +3,8 @@ import { makeStyles } from '@material-ui/core/styles';
 import { AppBar, Toolbar, Typography, Button, IconButton, Tabs, Tab } from '@material-ui/core';
 import { AttachMoney, AlternateEmail, SyncAlt } from '@material-ui/icons';
 import { Routes } from '../../libs/constants';
-
+import { toggleLoginDialog } from '../LoginDialog/LoginDialogAction';
+import { useDispatch } from 'react-redux';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -63,6 +64,7 @@ const useStyles = makeStyles((theme) => ({
 function Header(props) {
     const { history } = props;
     const classes = useStyles();
+    const dispatch = useDispatch();
     const TabClasses = {
         textColorInherit: classes.TabTextColorInherit,
         wrapper: classes.TabWrapper
@@ -101,6 +103,10 @@ function Header(props) {
     const homeButtonClick = () => {
         setTabIndex(false);
         goTo(Routes.HomePage.pathname);
+    };
+
+    const loginButtonClick = () => {
+        dispatch(toggleLoginDialog(true));
     };
 
     return (
@@ -142,7 +148,9 @@ function Header(props) {
                         </Tabs>
                     </div>
                     <div>
-                        <Button disableRipple color="inherit" className={classes.login}>Login</Button>
+                        <Button disableRipple color="inherit" className={classes.login} onClick={loginButtonClick}>
+                            Login
+                        </Button>
                     </div>
                 </Toolbar>
             </AppBar>

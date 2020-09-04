@@ -78,11 +78,12 @@ function CreateTableDialog() {
             bet: bet,
             timePlay: timeToPlay,
             players: players,
+            participants: ['gioexp'],
             author: 'gioexp'  // here the creator username
         };
         insertFirebase('tables', newTable)
             .then(result => {
-                dispatch(setSnackbarMessage('Table created! Good luck!'));
+                dispatch(setSnackbarMessage('Table created!'));
                 dispatch(setSnackbarSeverity('success'));
                 dispatch(toggleSnackbarOpen(true));
                 dispatch(toggleCreateTableDialog(false));
@@ -193,7 +194,7 @@ function CreateTableDialog() {
                     <Button className={classes.actionButton} onClick={handleClose} color="primary">
                         Cancel
                     </Button>
-                    <Button className={classes.actionButton} onClick={handleCreate} color="primary"
+                    <Button className={classes.actionButton} onClick={handleCreate} color="primary" variant="contained"
                         disabled={loading || tableNameFormError || betFormError || playersFormError || timeFormError}>
                         Create
                     </Button>
