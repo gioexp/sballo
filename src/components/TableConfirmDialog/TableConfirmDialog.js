@@ -38,6 +38,7 @@ function TableConfirmDialog() {
     const open = useSelector(state => state.TableConfirmDialogReducer.open);
     const id = useSelector(state => state.TableConfirmDialogReducer.id);
     const tables = useSelector(state => state.HallPageReducer.tables);
+    const user = useSelector(state => state.LoginDialogReducer.user);
     const dispatch = useDispatch();
     const [loading, setLoading] = useState(false);
 
@@ -48,7 +49,7 @@ function TableConfirmDialog() {
     const handleConfirm = () => {
         if (tables[id].participants.length < tables[id].players) {
             setLoading(true);
-            updateTableParticipantsFirebase(id, 'id-user', tables[id].players)  // here the joiner username
+            updateTableParticipantsFirebase(id, user.uid, tables[id].players)
                 .then(result => {
                     if (result.committed) {
                         dispatch(setSnackbarMessage('Table joined. Good luck!'));

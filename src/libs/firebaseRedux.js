@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 import { firebaseConfig } from '../firebaseConfig';
-
 import { setTables } from '../components/HallPage/HallPageAction';
+import { setUserLoggedIn } from '../components/LoginDialog/LoginDialogAction';
 
 export const initFirebaseRedux = (dispatch) => {
     firebase.initializeApp(firebaseConfig);
@@ -12,6 +12,11 @@ export const initFirebaseRedux = (dispatch) => {
         let newVal = snap.val();
         if (newVal) dispatch(setTables(newVal));
         else dispatch(setTables({}));
+    });
+
+    firebase.auth().onAuthStateChanged(function (user) {
+        console.log(user)
+        dispatch(setUserLoggedIn(user));
     });
 }
 
@@ -24,14 +29,50 @@ export const insertFirebase = (child, data) => {
     return childRef.update(newTable);
 }
 
-export const updateTableParticipantsFirebase = (id, userId, players) => {
+export const updateTableParticipantsFirebase = (id, userUid, players) => {
     const rootRef = firebase.database().ref();
     const childRef = rootRef.child('tables/' + id + '/participants');
     return childRef.transaction(function update(participants) {
         if (participants) {
-            if(participants.length < players) participants.push(userId);
+            if (participants.length < players) participants.push(userUid);
             else return;  // abort transaction
         }
         return participants;
     });
+}
+
+export const createUser = (email, password) => {
+    return firebase.auth().createUserWithEmailAndPassword(email, password);
+}
+
+export const updateUserProfile = (user, displayName, photo) => {
+    if (user) return user.updateProfile({ displayName: displayName, photoURL: photo });
+    else return new Promise.reject("invalid user");
+}
+
+export const sendEmailVerification = (user) => {
+    if (user) return user.sendEmailVerification();
+    else return new Promise.reject("invalid user");
+}
+
+export const logout = () => {
+    return firebase.auth().signOut();
+}
+
+export const login = (email, password) => {
+    return firebase.auth().signInWithEmailAndPassword(email, password);
+}
+
+export const sendPasswordResetEmail = (email) => {
+    return firebase.auth().sendPasswordResetEmail(email);
+}
+
+export const updateUserEmail = (user, email) => {
+    if (user) return user.updateEmail(email);
+    else return new Promise.reject("invalid user");
+}
+
+export const uploadUserImage = (user, image) => {
+    if (user) return firebase.storage().ref("sballo/" + user.uid + "/avatar.png").putString(image, 'data_url');
+    else return new Promise.reject("invalid user");
 }

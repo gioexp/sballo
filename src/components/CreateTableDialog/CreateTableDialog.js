@@ -50,6 +50,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 function CreateTableDialog() {
     const classes = useStyles();
     const open = useSelector(state => state.CreateTableDialogReducer.open);
+    const user = useSelector(state => state.LoginDialogReducer.user);
     const dispatch = useDispatch();
     const [tableName, setTableName] = useState('my Sballo table');
     const [players, setPlayers] = useState(4);
@@ -78,8 +79,8 @@ function CreateTableDialog() {
             bet: bet,
             timePlay: timeToPlay,
             players: players,
-            participants: ['gioexp'],
-            author: 'gioexp'  // here the creator username
+            participants: [user.uid],
+            author: user.displayName
         };
         insertFirebase('tables', newTable)
             .then(result => {

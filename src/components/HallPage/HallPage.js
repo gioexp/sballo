@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme) => ({
     createdDiv: {
         marginTop: '0.25em'
     },
-    checkIconDiv:{
+    checkIconDiv: {
         marginTop: '0.6em',
         marginRight: '3em',
     },
@@ -74,6 +74,7 @@ const useStyles = makeStyles((theme) => ({
 function HallPage() {
     const classes = useStyles();
     const tables = useSelector(state => state.HallPageReducer.tables);
+    const user = useSelector(state => state.LoginDialogReducer.user);
     const dispatch = useDispatch();
     const [actualTime, setActualTime] = useState(moment());
 
@@ -85,13 +86,25 @@ function HallPage() {
     }, []);
 
     const addButtonClick = () => {
-        dispatch(toggleCreateTableDialog(true));
+        if (user && user.emailVerified) dispatch(toggleCreateTableDialog(true));
+        else {
+            dispatch(setSnackbarMessage('Before create table please login or verify your email. Thanks'));
+            dispatch(setSnackbarSeverity('warning'));
+            dispatch(toggleSnackbarOpen(true));
+        }
     }
 
     const openTableConfirm = (key, table) => {
         if (table.participants.length < table.players) {
-            dispatch(setTableConfirmDialogId(key));
-            dispatch(toggleTableConfirmDialog(true));
+            if (user && user.emailVerified) {
+                dispatch(setTableConfirmDialogId(key));
+                dispatch(toggleTableConfirmDialog(true));
+            }
+            else {
+                dispatch(setSnackbarMessage('Before join table please login or verify your email. Thanks'));
+                dispatch(setSnackbarSeverity('warning'));
+                dispatch(toggleSnackbarOpen(true));
+            }
         }
         else {
             dispatch(setSnackbarMessage('Table is full. Try with another one.'));
@@ -114,11 +127,12 @@ function HallPage() {
                                     primary={table.name}
                                     secondary={'made by: ' + table.author}
                                 />
-                                <ListItemSecondaryAction className={classes.secondaryAction} button onClick={() => openTableConfirm(key, table)}>
-                                    {/* this is visible only if player joined table */}
-                                    <div className={classes.checkIconDiv}>
-                                        <CheckCircle fontSize='large' className={classes.checkIcon} />
-                                    </div>
+                                <ListItemSecondaryAction className={classes.secondaryAction} button="true" onClick={() => openTableConfirm(key, table)}>
+
+                                    {user && table.participants.includes(user.uid) &&
+                                        <div className={classes.checkIconDiv}>
+                                            <CheckCircle fontSize='large' className={classes.checkIcon} />
+                                        </div>}
                                     <div className={classes.betDiv}>
                                         <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
                                             bet
@@ -161,7 +175,7 @@ function HallPage() {
                 <CircularProgress size='7em' className={classes.loading} />
             }
             <Button variant="outlined" color="primary" className={classes.addButton}
-                onClick={addButtonClick} >
+                onClick={addButtonClick}>
                 <Add fontSize="large" />
             </Button>
         </div>

@@ -5,6 +5,7 @@ export const Routes = {
     'SettingsPage': { name: 'SettingsPage', pathname: '/settings' },
     'CreditsPage': { name: 'CreditsPage', pathname: '/credits' },
     'ContactUsPage': { name: 'ContactUsPage', pathname: '/contactus' },
+    'AccountPage': {name: 'AccountPage', pathname: '/account'}
 };
 
 export const Theme = {
@@ -26,3 +27,12 @@ export const Theme = {
 
 export const TABLENAME_MIN_LENGTH = 5;
 export const TABLENAME_MAX_LENGTH = 30;
+
+export const NICKNAME_MIN_LENGTH = 5;
+export const NICKNAME_MAX_LENGTH = 20;
+
+export const VALID_EMAIL = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+export const VALID_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_?])(?=.{8,})/;
+
+export const USER_NOT_FOUND = 'auth/user-not-found';
+export const WRONG_PASSWORD = 'auth/wrong-password';

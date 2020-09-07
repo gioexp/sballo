@@ -17,6 +17,7 @@ import CreateTableDialog from '../CreateTableDialog/CreateTableDialog';
 import Snackbar from '../Snackbar/Snackbar';
 import TableConfirmDialog from '../TableConfirmDialog/TableConfirmDialog';
 import LoginDialog from '../LoginDialog/LoginDialog';
+import AccountPage from '../AccountPage/AccountPage';
 
 const history = createBrowserHistory();
 const theme = createMuiTheme(Theme);
@@ -44,6 +45,7 @@ function App() {
                         <Route exact path={Routes.SettingsPage.pathname} component={SettingsPage} />
                         <Route exact path={Routes.CreditsPage.pathname} component={CreditsPage} />
                         <Route exact path={Routes.ContactUsPage.pathname} component={ContactUsPage} />
+                        <Route exact path={Routes.AccountPage.pathname} component={AccountPage} />
                     </Switch>
                     <Footer />
                 </Router>

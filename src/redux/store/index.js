@@ -4,13 +4,15 @@ import CreateTableDialogReducer from '../../components/CreateTableDialog/CreateT
 import SnackbarReducer from '../../components/Snackbar/SnackbarReducer';
 import TableConfirmDialogReducer from '../../components/TableConfirmDialog/TableConfirmDialogReducer';
 import LoginDialogReducer from '../../components/LoginDialog/LoginDialogReducer'; 
+import HeaderReducer from '../../components/Header/HeaderReducer';
 
 const reducers = combineReducers({
   HallPageReducer,
   CreateTableDialogReducer,
   SnackbarReducer,
   TableConfirmDialogReducer,
-  LoginDialogReducer
+  LoginDialogReducer,
+  HeaderReducer
 });
 
 const store = createStore(reducers);

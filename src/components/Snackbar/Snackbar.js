@@ -7,7 +7,8 @@ import { makeStyles } from '@material-ui/core/styles';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        top: "9.5%"
+        top: "9.5%",
+        width: '15%'
     },
   }));
 
