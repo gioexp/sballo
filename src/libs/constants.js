@@ -5,7 +5,7 @@ export const Routes = {
     'SettingsPage': { name: 'SettingsPage', pathname: '/settings' },
     'CreditsPage': { name: 'CreditsPage', pathname: '/credits' },
     'ContactUsPage': { name: 'ContactUsPage', pathname: '/contactus' },
-    'AccountPage': {name: 'AccountPage', pathname: '/account'}
+    'AccountPage': { name: 'AccountPage', pathname: '/account' }
 };
 
 export const Theme = {
@@ -36,3 +36,8 @@ export const VALID_PASSWORD = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#$%^&*_
 
 export const USER_NOT_FOUND = 'auth/user-not-found';
 export const WRONG_PASSWORD = 'auth/wrong-password';
+
+export const PLAYERS_VALUES = [2, 3, 4, 5, 6, 7];
+export const TIME_VALUES = [15, 30, 45, 60];
+
+export const START_POINTS = 100;

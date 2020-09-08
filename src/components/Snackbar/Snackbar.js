@@ -4,13 +4,14 @@ import MuiAlert from '@material-ui/lab/Alert';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleSnackbarOpen } from './SnackbarAction';
 import { makeStyles } from '@material-ui/core/styles';
+import { Hidden } from '@material-ui/core';
 
 const useStyles = makeStyles((theme) => ({
     root: {
-        top: "9.5%",
+        top: '9.5%',
         width: '15%'
     },
-  }));
+}));
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant='filled' {...props} />;
@@ -25,19 +26,19 @@ function Snackbar() {
     const severity = useSelector(state => state.SnackbarReducer.severity);
 
     const handleClose = (event, reason) => {
-        if (reason === 'clickaway') {
-            return;
-        }
+        if (reason === 'clickaway') return;
         dispatch(toggleSnackbarOpen(false));
     };
 
     return (
         <div>
-            <MuiSnackbar open={open} autoHideDuration={10000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} classes={{root: classes.root}}>
-                <Alert onClose={handleClose} severity={severity}>
-                    {message}
-                </Alert>
-            </MuiSnackbar>
+            <Hidden xsDown>
+                <MuiSnackbar open={open} autoHideDuration={10000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'right' }} classes={{ root: classes.root }}>
+                    <Alert onClose={handleClose} severity={severity}>
+                        {message}
+                    </Alert>
+                </MuiSnackbar>
+            </Hidden>
         </div>
     );
 }

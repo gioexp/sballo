@@ -2,7 +2,7 @@ import React, { useState, useRef } from 'react';
 import { makeStyles } from '@material-ui/core/styles';
 import {
     AppBar, Toolbar, Typography, Button, IconButton, Tabs, Tab, Avatar, Popper, Grow, Paper,
-    ClickAwayListener, MenuList, MenuItem, Divider, CircularProgress
+    ClickAwayListener, MenuList, MenuItem, Divider, CircularProgress, Hidden
 } from '@material-ui/core';
 import { AttachMoney, AlternateEmail, SyncAlt, Face } from '@material-ui/icons';
 import { Routes } from '../../libs/constants';
@@ -186,66 +186,68 @@ function Header(props) {
                             <Typography variant="h6" className={classes.oLetter}>o</Typography>
                         </div>
                     </IconButton>
-                    <div className={classes.navArea}>
-                        <Tabs value={tabIndex} onChange={changeTabIndex}
-                            classes={{
-                                indicator: classes.TabsIndicator,
-                                flexContainer: classes.TabsFlexContainer
-                            }}
-                            centered>
-                            <Tab disableRipple label="Hall"
-                                className={classes.Tab}
-                                classes={TabClasses} />
-                            <Tab disableRipple label="Shop"
-                                className={classes.Tab}
-                                classes={TabClasses} />
-                            <Tab disableRipple label="Settings"
-                                className={classes.Tab}
-                                classes={TabClasses} />
-                            <Tab disableRipple label="Credits"
-                                className={classes.Tab}
-                                classes={TabClasses} />
-                            <Tab disableRipple label="Contact us"
-                                className={classes.Tab}
-                                classes={TabClasses} />
-                        </Tabs>
-                    </div>
-                    <div>
-                        {!user &&
-                            <Button disableRipple color="inherit" className={classes.login} onClick={loginButtonClick}>
-                                Login
+                    <Hidden smDown>
+                        <div className={classes.navArea}>
+                            <Tabs value={tabIndex} onChange={changeTabIndex}
+                                classes={{
+                                    indicator: classes.TabsIndicator,
+                                    flexContainer: classes.TabsFlexContainer
+                                }}
+                                centered>
+                                <Tab disableRipple label="Hall"
+                                    className={classes.Tab}
+                                    classes={TabClasses} />
+                                <Tab disableRipple label="Shop"
+                                    className={classes.Tab}
+                                    classes={TabClasses} />
+                                <Tab disableRipple label="Settings"
+                                    className={classes.Tab}
+                                    classes={TabClasses} />
+                                <Tab disableRipple label="Credits"
+                                    className={classes.Tab}
+                                    classes={TabClasses} />
+                                <Tab disableRipple label="Contact us"
+                                    className={classes.Tab}
+                                    classes={TabClasses} />
+                            </Tabs>
+                        </div>
+                        <div>
+                            {!user &&
+                                <Button disableRipple color="inherit" className={classes.login} onClick={loginButtonClick}>
+                                    Login
                             </Button>}
-                        {user &&
-                            <div>
-                                <IconButton onClick={userButtonClick} ref={userButtonRef}>
-                                    {!user.photoURL &&
-                                        <Avatar className={user.emailVerified ? classes.white : classes.grey}>
-                                            <Face color="primary" fontSize="large" />
-                                        </Avatar>}
-                                    {user.photoURL && imageLoaded && <Avatar src={user.photoURL} />}
-                                    {user.photoURL && !imageLoaded && <CircularProgress className={classes.circularProgress} size={'1.65em'}/>}
-                                </IconButton>
-                                <Popper open={openUserMenu} anchorEl={userButtonRef.current} role={undefined} transition disablePortal className={classes.popper}>
-                                    {({ TransitionProps, placement }) => (
-                                        <Grow
-                                            {...TransitionProps}
-                                        >
-                                            <Paper>
-                                                <ClickAwayListener onClickAway={handleCloseUserMenu}>
-                                                    <MenuList autoFocusItem={openUserMenu} id="menu-list-grow" onKeyDown={handleUserMenuListKeyDown}>
-                                                        <MenuItem onClick={handleAccount}>My account</MenuItem>
-                                                        <Divider component="li" />
-                                                        <MenuItem onClick={handleLogout}>Logout</MenuItem>
-                                                    </MenuList>
-                                                </ClickAwayListener>
-                                            </Paper>
-                                        </Grow>
-                                    )}
-                                </Popper>
-                            </div>
+                            {user &&
+                                <div>
+                                    <IconButton onClick={userButtonClick} ref={userButtonRef}>
+                                        {!user.photoURL &&
+                                            <Avatar className={user.emailVerified ? classes.white : classes.grey}>
+                                                <Face color="primary" fontSize="large" />
+                                            </Avatar>}
+                                        {user.photoURL && imageLoaded && <Avatar src={user.photoURL} />}
+                                        {user.photoURL && !imageLoaded && <CircularProgress className={classes.circularProgress} size={'1.65em'} />}
+                                    </IconButton>
+                                    <Popper open={openUserMenu} anchorEl={userButtonRef.current} role={undefined} transition disablePortal className={classes.popper}>
+                                        {({ TransitionProps, placement }) => (
+                                            <Grow
+                                                {...TransitionProps}
+                                            >
+                                                <Paper>
+                                                    <ClickAwayListener onClickAway={handleCloseUserMenu}>
+                                                        <MenuList autoFocusItem={openUserMenu} id="menu-list-grow" onKeyDown={handleUserMenuListKeyDown}>
+                                                            <MenuItem onClick={handleAccount}>My account</MenuItem>
+                                                            <Divider component="li" />
+                                                            <MenuItem onClick={handleLogout}>Logout</MenuItem>
+                                                        </MenuList>
+                                                    </ClickAwayListener>
+                                                </Paper>
+                                            </Grow>
+                                        )}
+                                    </Popper>
+                                </div>
 
-                        }
-                    </div>
+                            }
+                        </div>
+                    </Hidden>
                 </Toolbar>
             </AppBar>
         </div>

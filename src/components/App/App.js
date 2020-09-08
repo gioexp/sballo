@@ -18,6 +18,7 @@ import Snackbar from '../Snackbar/Snackbar';
 import TableConfirmDialog from '../TableConfirmDialog/TableConfirmDialog';
 import LoginDialog from '../LoginDialog/LoginDialog';
 import AccountPage from '../AccountPage/AccountPage';
+import GameTablesDialog from '../GameTablesDialog/GameTablesDialog';
 
 const history = createBrowserHistory();
 const theme = createMuiTheme(Theme);
@@ -36,6 +37,7 @@ function App() {
                 <CreateTableDialog />
                 <TableConfirmDialog />
                 <Snackbar />
+                <GameTablesDialog />
                 <Router history={history}>
                     <Header history={history} />
                     <Switch>

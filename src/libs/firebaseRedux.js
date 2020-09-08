@@ -1,7 +1,7 @@
 import * as firebase from 'firebase';
 import { firebaseConfig } from '../firebaseConfig';
 import { setTables } from '../components/HallPage/HallPageAction';
-import { setUserLoggedIn } from '../components/LoginDialog/LoginDialogAction';
+import { setUserLoggedIn, setUserDetails } from '../components/LoginDialog/LoginDialogAction';
 
 export const initFirebaseRedux = (dispatch) => {
     firebase.initializeApp(firebaseConfig);
@@ -14,8 +14,14 @@ export const initFirebaseRedux = (dispatch) => {
         else dispatch(setTables({}));
     });
 
+    rootRef.child('userDetails').on('value', snap => {
+        let newVal = snap.val();
+        if (newVal) dispatch(setUserDetails(newVal));
+        else dispatch(setUserDetails({}));
+        console.log(newVal)
+    });
+
     firebase.auth().onAuthStateChanged(function (user) {
-        console.log(user)
         dispatch(setUserLoggedIn(user));
     });
 }
@@ -24,9 +30,9 @@ export const insertFirebase = (child, data) => {
     const rootRef = firebase.database().ref();
     const childRef = rootRef.child(child);
     let id = childRef.push().key;
-    let newTable = {};
-    newTable[id] = data;
-    return childRef.update(newTable);
+    let newObject = {};
+    newObject[id] = data;
+    return childRef.update(newObject);
 }
 
 export const updateTableParticipantsFirebase = (id, userUid, players) => {

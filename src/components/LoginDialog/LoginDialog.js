@@ -8,8 +8,8 @@ import { useSelector, useDispatch } from 'react-redux';
 import { toggleLoginDialog } from './LoginDialogAction';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import clsx from 'clsx';
-import { VALID_EMAIL, VALID_PASSWORD, NICKNAME_MIN_LENGTH, NICKNAME_MAX_LENGTH, USER_NOT_FOUND, WRONG_PASSWORD } from '../../libs/constants';
-import { createUser, updateUserProfile, sendEmailVerification, login, sendPasswordResetEmail } from '../../libs/firebaseRedux';
+import { VALID_EMAIL, VALID_PASSWORD, NICKNAME_MIN_LENGTH, NICKNAME_MAX_LENGTH, USER_NOT_FOUND, WRONG_PASSWORD, START_POINTS } from '../../libs/constants';
+import { createUser, updateUserProfile, sendEmailVerification, login, sendPasswordResetEmail, insertFirebase } from '../../libs/firebaseRedux';
 
 const useStyles = makeStyles((theme) => ({
     title: {
@@ -116,11 +116,32 @@ function LoginDialog() {
             .then(result => {
                 updateUserProfile(result.user, nickName)
                     .then(() => {
-                        dispatch(setSnackbarMessage('User created! We sent you an email. Please, verify your credential clicking on link in email. Thanks!'));
-                        dispatch(setSnackbarSeverity('success'));
-                        dispatch(toggleSnackbarOpen(true));
-                        handleClose();
-                        setLoading(false);
+                        let userDetail = { uid: result.user.uid, points: START_POINTS };
+                        insertFirebase('userDetails', userDetail)
+                            .then(() => {
+                                sendEmailVerification(result.user)
+                                    .then(() => {
+                                        dispatch(setSnackbarMessage('User created! We sent you an email. Please, verify your credential clicking on link in email. Thanks!'));
+                                        dispatch(setSnackbarSeverity('success'));
+                                        dispatch(toggleSnackbarOpen(true));
+                                        handleClose();
+                                        setLoading(false);
+                                    })
+                                    .catch(error => {
+                                        dispatch(setSnackbarMessage('Error while sending verification email. Retry later...'));
+                                        dispatch(setSnackbarSeverity('error'));
+                                        dispatch(toggleSnackbarOpen(true));
+                                        handleClose();
+                                        setLoading(false);
+                                    });
+                            })
+                            .catch(error => {
+                                dispatch(setSnackbarMessage('Error while creating user detail data. Retry later...'));
+                                dispatch(setSnackbarSeverity('error'));
+                                dispatch(toggleSnackbarOpen(true));
+                                handleClose();
+                                setLoading(false);
+                            });
                     })
                     .catch(error => {
                         dispatch(setSnackbarMessage('Error while updating user profile. Retry later...'));
@@ -129,14 +150,6 @@ function LoginDialog() {
                         handleClose();
                         setLoading(false);
                     });
-                sendEmailVerification(result.user)
-                    .catch(error => {
-                        dispatch(setSnackbarMessage('Error while sending verification email. Retry later...'));
-                        dispatch(setSnackbarSeverity('error'));
-                        dispatch(toggleSnackbarOpen(true));
-                        handleClose();
-                        setLoading(false);
-                    })
             })
             .catch(error => {
                 dispatch(setSnackbarMessage('Error while creating user. Retry later...'));

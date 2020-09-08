@@ -4,13 +4,15 @@ import { makeStyles } from '@material-ui/core/styles';
 import { toggleCreateTableDialog } from '../CreateTableDialog/CreateTableDialogAction';
 import {
     Button, List, ListItem, ListItemText, Divider, CircularProgress, ListItemIcon, ListItemSecondaryAction,
-    Typography
+    Typography, Tooltip, Hidden
 } from '@material-ui/core';
-import { AttachMoney, Add, CheckCircle } from '@material-ui/icons';
+import { AttachMoney, Add, CheckCircle, VideogameAsset, ControlPoint, Group, Timer, AccessTime } from '@material-ui/icons';
 import moment from 'moment';
 import { toggleTableConfirmDialog, setTableConfirmDialogId } from '../TableConfirmDialog/TableConfirmDialogAction';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
-import { green } from '@material-ui/core/colors';
+import { green, grey } from '@material-ui/core/colors';
+import { toggleGameTablesDialog } from '../GameTablesDialog/GameTablesDialogAction';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     root: {
@@ -35,11 +37,26 @@ const useStyles = makeStyles((theme) => ({
             borderWidth: 3,
         },
     },
+    gameTablesButton: {
+        position: 'absolute',
+        alignSelf: 'flex-end',
+        bottom: '12em',
+        right: '2em',
+        borderWidth: 3,
+        borderRadius: '50%',
+        borderColor: theme.palette.primary.main,
+        height: '4.5em',
+        width: '4em',
+        boxShadow: '0px 8px 15px rgba(0, 0, 0, 0.2)',
+        '&:hover': {
+            borderWidth: 3,
+        },
+    },
     list: {
         width: '50%'
     },
     loading: {
-        marginTop: '20em'
+        marginTop: '13%'
     },
     secondaryAction: {
         display: 'inline-flex',
@@ -55,6 +72,14 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '0.25em',
         marginRight: '3em',
     },
+    infoTableIcon: {
+        width: '2em',
+        display: 'flex',
+        justifyContent: 'center',
+    },
+    infoTableText:{
+        color: 'rgba(0, 0, 0, 0.54)'
+    },
     timePlayDiv: {
         marginTop: '0.25em',
         marginRight: '6em',
@@ -63,11 +88,31 @@ const useStyles = makeStyles((theme) => ({
         marginTop: '0.25em'
     },
     checkIconDiv: {
-        marginTop: '0.6em',
+        marginTop: '0.4em',
         marginRight: '3em',
     },
     checkIcon: {
         color: green[500]
+    },
+    noTablesDiv: {
+        width: '100%',
+        marginTop: '13%'
+    },
+    noTables: {
+        display: 'flex',
+        justifyContent: 'center',
+        color: grey[500],
+        fontWeight: 'bold'
+    },
+    noTablesIconDiv: {
+        display: 'inline-flex',
+        width: '100%',
+        justifyContent: 'center'
+    },
+    noTablesIcon: {
+        color: grey[500],
+        marginLeft: '0.5%',
+        marginTop: '0.2%'
     }
 }));
 
@@ -92,13 +137,29 @@ function HallPage() {
             dispatch(setSnackbarSeverity('warning'));
             dispatch(toggleSnackbarOpen(true));
         }
-    }
+    };
+
+    const openGameTables = () => {
+        if (user && user.emailVerified) dispatch(toggleGameTablesDialog(true));
+        else {
+            dispatch(setSnackbarMessage('Before entering in game tables please login or verify your email. Thanks'));
+            dispatch(setSnackbarSeverity('warning'));
+            dispatch(toggleSnackbarOpen(true));
+        }
+    };
 
     const openTableConfirm = (key, table) => {
         if (table.participants.length < table.players) {
             if (user && user.emailVerified) {
-                dispatch(setTableConfirmDialogId(key));
-                dispatch(toggleTableConfirmDialog(true));
+                if (!table.participants.includes(user.uid)) {
+                    dispatch(setTableConfirmDialogId(key));
+                    dispatch(toggleTableConfirmDialog(true));
+                }
+                else {
+                    dispatch(setSnackbarMessage('Table is about to start. Wait other participants to join. Thanks'));
+                    dispatch(setSnackbarSeverity('info'));
+                    dispatch(toggleSnackbarOpen(true));
+                }
             }
             else {
                 dispatch(setSnackbarMessage('Before join table please login or verify your email. Thanks'));
@@ -111,7 +172,7 @@ function HallPage() {
             dispatch(setSnackbarSeverity('warning'));
             dispatch(toggleSnackbarOpen(true));
         }
-    }
+    };
 
     return (
         <div className={classes.root}>
@@ -127,45 +188,47 @@ function HallPage() {
                                     primary={table.name}
                                     secondary={'made by: ' + table.author}
                                 />
-                                <ListItemSecondaryAction className={classes.secondaryAction} button="true" onClick={() => openTableConfirm(key, table)}>
+                                <Hidden mdDown>
+                                    <ListItemSecondaryAction className={classes.secondaryAction} button="true" onClick={() => openTableConfirm(key, table)}>
+                                        {user && table.participants.includes(user.uid) &&
+                                            <div className={classes.checkIconDiv}>
+                                                <CheckCircle fontSize='large' className={classes.checkIcon} />
+                                            </div>}
+                                        <Tooltip title="Bet" placement="bottom">
+                                            <div className={classes.betDiv}>
+                                                <AttachMoney fontSize="small" className={classes.infoTableIcon} />
+                                                <Typography variant="body1" align="center" className={classes.infoTableText}>
+                                                    {table.bet}
+                                                </Typography>
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip title="Players" placement="bottom">
+                                            <div className={classes.playersDiv}>
+                                                <Group fontSize="small" className={classes.infoTableIcon} />
+                                                <Typography variant="body1" align="center" className={classes.infoTableText}>
+                                                    {table.participants.length + ' / ' + table.players}
+                                                </Typography>
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip title="Play time" placement="bottom">
+                                            <div className={classes.timePlayDiv}>
+                                                <Timer fontSize="small" className={classes.infoTableIcon} />
+                                                <Typography variant="body1" align="center" className={classes.infoTableText}>
+                                                    {table.timePlay + '\'\''}
+                                                </Typography>
+                                            </div>
+                                        </Tooltip>
+                                        <Tooltip title="Created" placement="bottom">
+                                            <div className={classes.createdDiv}>
+                                                <AccessTime fontSize="small" className={classes.infoTableIcon} />
+                                                <Typography variant="body1" align="center" className={classes.infoTableText}>
+                                                    {actualTime.diff(moment(new Date(table.timestamp)), 'minute') === 0 ? 'Now' : actualTime.diff(moment(new Date(table.timestamp)), 'minute') + '\''}
+                                                </Typography>
+                                            </div>
+                                        </Tooltip>
+                                    </ListItemSecondaryAction>
+                                </Hidden>
 
-                                    {user && table.participants.includes(user.uid) &&
-                                        <div className={classes.checkIconDiv}>
-                                            <CheckCircle fontSize='large' className={classes.checkIcon} />
-                                        </div>}
-                                    <div className={classes.betDiv}>
-                                        <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
-                                            bet
-                                    </Typography>
-                                        <Typography variant="body1" color="inherit" align="center">
-                                            {table.bet}
-                                        </Typography>
-                                    </div>
-                                    <div className={classes.playersDiv}>
-                                        <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
-                                            players
-                                    </Typography>
-                                        <Typography variant="body1" color="inherit" align="center">
-                                            {table.participants.length + ' / ' + table.players}
-                                        </Typography>
-                                    </div>
-                                    <div className={classes.timePlayDiv}>
-                                        <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
-                                            play time
-                                    </Typography>
-                                        <Typography variant="body1" color="inherit" align="center">
-                                            {table.timePlay + '\'\''}
-                                        </Typography>
-                                    </div>
-                                    <div className={classes.createdDiv}>
-                                        <Typography variant="body1" color="inherit" align="center" className={classes.greyText}>
-                                            created
-                                    </Typography>
-                                        <Typography variant="body1" color="inherit" align="center">
-                                            {actualTime.diff(moment(new Date(table.timestamp)), 'minute') === 0 ? 'Now' : actualTime.diff(moment(new Date(table.timestamp)), 'minute') + '\''}
-                                        </Typography>
-                                    </div>
-                                </ListItemSecondaryAction>
                             </ListItem>
                             <Divider component="li" />
                         </div>
@@ -174,10 +237,29 @@ function HallPage() {
             {!tables &&
                 <CircularProgress size='7em' className={classes.loading} />
             }
-            <Button variant="outlined" color="primary" className={classes.addButton}
-                onClick={addButtonClick}>
-                <Add fontSize="large" />
-            </Button>
+            {tables && _.isEmpty(tables) &&
+                <div className={classes.noTablesDiv}>
+                    <Typography variant="h4" className={classes.noTables}>No tables available</Typography>
+                    <br />
+                    <div className={classes.noTablesIconDiv}>
+                        <Typography variant="h4" className={classes.noTables}>Create one by clicking button</Typography>
+                        <ControlPoint fontSize="large" className={classes.noTablesIcon} />
+                    </div>
+                </div>
+            }
+            <Tooltip title="Create new table" placement="left">
+                <Button variant="outlined" color="primary" className={classes.addButton}
+                    onClick={addButtonClick}>
+                    <Add fontSize="large" />
+                </Button>
+            </Tooltip>
+            {tables && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
+                <Tooltip title="Go to game tables" placement="left">
+                    <Button variant="outlined" color="primary" className={classes.gameTablesButton}
+                        onClick={openGameTables}>
+                        <VideogameAsset fontSize="large" />
+                    </Button>
+                </Tooltip>}
         </div>
     );
 }

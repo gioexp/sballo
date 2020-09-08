@@ -6,7 +6,7 @@ import {
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleCreateTableDialog } from './CreateTableDialogAction';
 import { makeStyles } from '@material-ui/core/styles';
-import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH } from '../../libs/constants';
+import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH, PLAYERS_VALUES, TIME_VALUES } from '../../libs/constants';
 import clsx from 'clsx';
 import { insertFirebase } from '../../libs/firebaseRedux';
 import moment from 'moment';
@@ -51,20 +51,19 @@ function CreateTableDialog() {
     const classes = useStyles();
     const open = useSelector(state => state.CreateTableDialogReducer.open);
     const user = useSelector(state => state.LoginDialogReducer.user);
+    const userDetails = useSelector(state => state.LoginDialogReducer.userDetails);
     const dispatch = useDispatch();
-    const [tableName, setTableName] = useState('my Sballo table');
+    const [tableName, setTableName] = useState('My Sballo table');
     const [players, setPlayers] = useState(4);
     const [timeToPlay, setTimeToPlay] = useState(45);
     const [bet, setBet] = useState(0);
     const [loading, setLoading] = useState(false);
 
-    const playersValues = [2, 3, 4, 5, 6, 7];
-    const timeValues = [15, 30, 45, 60];
-
     const tableNameFormError = tableName.length < TABLENAME_MIN_LENGTH || tableName.length > TABLENAME_MAX_LENGTH;
-    const betFormError = bet < 0;
-    const playersFormError = !playersValues.includes(players);
-    const timeFormError = !timeValues.includes(timeToPlay);
+    const betNegativeFormError = bet < 0;
+    const betEnoughFormError = user && userDetails && bet > Object.values(userDetails).filter(el => el.uid === user.uid)[0].points;
+    const playersFormError = !PLAYERS_VALUES.includes(players);
+    const timeFormError = !TIME_VALUES.includes(timeToPlay);
 
     const handleClose = () => {
         dispatch(toggleCreateTableDialog(false));
@@ -80,7 +79,8 @@ function CreateTableDialog() {
             timePlay: timeToPlay,
             players: players,
             participants: [user.uid],
-            author: user.displayName
+            author: user.displayName,
+            authorUid: user.uid
         };
         insertFirebase('tables', newTable)
             .then(result => {
@@ -136,13 +136,13 @@ function CreateTableDialog() {
                             />} />
                         {tableNameFormError && <FormHelperText>Table name should be at least {TABLENAME_MIN_LENGTH} chars</FormHelperText>}
                     </FormControl>
-                    <FormControl required error={betFormError} component="fieldset" className={classes.formControl} >
+                    <FormControl required error={betNegativeFormError || betEnoughFormError} component="fieldset" className={classes.formControl} >
                         <FormControlLabel className={classes.textField} control={
                             <TextField
                                 label="Bet"
                                 type="number"
                                 required
-                                error={betFormError}
+                                error={betNegativeFormError || betEnoughFormError}
                                 value={bet}
                                 onChange={(event) => setBet(Number(event.target.value))}
                                 className={classes.textField}
@@ -150,13 +150,14 @@ function CreateTableDialog() {
                                     shrink: true,
                                 }}
                             />} />
-                        {betFormError && <FormHelperText>Bet must be positive</FormHelperText>}
+                        {betNegativeFormError && <FormHelperText>Bet must be positive</FormHelperText>}
+                        {betEnoughFormError && <FormHelperText>You don't have enough points to bet</FormHelperText>}
                     </FormControl>
                     <FormControl required error={playersFormError} component="fieldset" className={classes.formControl} >
                         <FormGroup>
                             <div className={classes.checkBoxesDiv}>
                                 <FormLabel className={classes.checkBoxesLabel} component="legend">Players</FormLabel>
-                                {playersValues.map(el =>
+                                {PLAYERS_VALUES.map(el =>
                                     <FormControlLabel
                                         key={el}
                                         control={
@@ -175,7 +176,7 @@ function CreateTableDialog() {
                         <FormGroup>
                             <div className={classes.checkBoxesDiv}>
                                 <FormLabel className={classes.checkBoxesLabel} component="legend">Play card time</FormLabel>
-                                {timeValues.map(el =>
+                                {TIME_VALUES.map(el =>
                                     <FormControlLabel
                                         key={el}
                                         control={
@@ -196,7 +197,7 @@ function CreateTableDialog() {
                         Cancel
                     </Button>
                     <Button className={classes.actionButton} onClick={handleCreate} color="primary" variant="contained"
-                        disabled={loading || tableNameFormError || betFormError || playersFormError || timeFormError}>
+                        disabled={loading || tableNameFormError || betNegativeFormError || betEnoughFormError || playersFormError || timeFormError}>
                         Create
                     </Button>
                 </DialogActions>

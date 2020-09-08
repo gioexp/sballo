@@ -37,7 +37,7 @@ const useStyles = makeStyles((theme) => ({
         height: '13em'
     },
     avatarIcon: {
-        fontSize: 300
+        fontSize: 313
     },
     userInfo: {
         display: 'inline-flex'
@@ -80,7 +80,6 @@ const useStyles = makeStyles((theme) => ({
         height: 24
     },
     saveButtonDiv: {
-        // margin: theme.spacing(1),
         position: 'relative',
         display: 'inline-flex'
     },
