@@ -11,6 +11,7 @@ import clsx from 'clsx';
 import { insertFirebase } from '../../libs/firebaseRedux';
 import moment from 'moment';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
+import _ from 'lodash';
 
 const useStyles = makeStyles((theme) => ({
     title: {
@@ -61,7 +62,7 @@ function CreateTableDialog() {
 
     const tableNameFormError = tableName.length < TABLENAME_MIN_LENGTH || tableName.length > TABLENAME_MAX_LENGTH;
     const betNegativeFormError = bet < 0;
-    const betEnoughFormError = user && userDetails && bet > Object.values(userDetails).filter(el => el.uid === user.uid)[0].points;
+    const betEnoughFormError = user && !_.isEmpty(userDetails) && bet > Object.values(userDetails).filter(el => el.uid === user.uid)[0].points;
     const playersFormError = !PLAYERS_VALUES.includes(players);
     const timeFormError = !TIME_VALUES.includes(timeToPlay);
 

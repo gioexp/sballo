@@ -3,10 +3,10 @@ import { makeStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { grey, green } from '@material-ui/core/colors';
 import { IconButton, Avatar, Typography, Tooltip, Button, TextField, CircularProgress } from '@material-ui/core';
-import { Face, Email, CheckCircle, AccessTime, Error } from '@material-ui/icons';
+import { Face, Email, CheckCircle, AccessTime, Error, AttachMoney } from '@material-ui/icons';
 import clsx from 'clsx';
 import moment from 'moment';
-import { sendEmailVerification, updateUserEmail, updateUserProfile, uploadUserImage } from '../../libs/firebaseRedux';
+import { sendEmailVerification, updateUserEmail, updateUserProfile, uploadUserImage, updateUserDetails } from '../../libs/firebaseRedux';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import { VALID_EMAIL, NICKNAME_MIN_LENGTH, NICKNAME_MAX_LENGTH } from '../../libs/constants';
 import { toggleUserImageLoaded } from '../Header/HeaderAction';
@@ -107,6 +107,7 @@ function AccountPage() {
     const classes = useStyles();
     const dispatch = useDispatch();
     const user = useSelector(state => state.LoginDialogReducer.user);
+    const userDetails = useSelector(state => state.LoginDialogReducer.userDetails);
     const [disableButtonSendEmail, setDisableButtonSendEmail] = useState(false);
     const [editEmail, setEditEmail] = useState(false);
     const [tempEmail, setTempEmail] = useState('');
@@ -115,7 +116,7 @@ function AccountPage() {
     const [imageLoaded, setImageLoaded] = useState(true);
     const [loading, setLoading] = useState(false);
 
-    const uploadFile = (event) => {
+    const uploadImage = (event) => {
         if (event.target.files[0]) {
             setImageLoaded(false);
             dispatch(toggleUserImageLoaded(false));
@@ -128,28 +129,45 @@ function AccountPage() {
                             .then(url => {
                                 updateUserProfile(user, user.displayName, url)
                                     .then(() => {
-                                        dispatch(setSnackbarMessage('Image uploaded!'));
-                                        dispatch(setSnackbarSeverity('success'));
-                                        dispatch(toggleSnackbarOpen(true));
-                                        setImageLoaded(true);
-                                        dispatch(toggleUserImageLoaded(true));
+                                        let key = Object.entries(userDetails).filter(([key, usr]) => usr.uid === user.uid)[0][0];
+                                        updateUserDetails(key, user.displayName, url)
+                                            .then(() => {
+                                                dispatch(setSnackbarMessage('Image uploaded!'));
+                                                dispatch(setSnackbarSeverity('success'));
+                                                dispatch(toggleSnackbarOpen(true));
+                                                setImageLoaded(true);
+                                                dispatch(toggleUserImageLoaded(true));
+                                            })
+                                            .catch(error => {
+                                                dispatch(setSnackbarMessage('Error while updating userDetails. Retry later...'));
+                                                dispatch(setSnackbarSeverity('error'));
+                                                dispatch(toggleSnackbarOpen(true));
+                                                setImageLoaded(true);
+                                                dispatch(toggleUserImageLoaded(true));
+                                            });
                                     })
                                     .catch(error => {
                                         dispatch(setSnackbarMessage('Error while updating image. Retry later...'));
                                         dispatch(setSnackbarSeverity('error'));
                                         dispatch(toggleSnackbarOpen(true));
+                                        setImageLoaded(true);
+                                        dispatch(toggleUserImageLoaded(true));
                                     })
                             })
                             .catch(error => {
                                 dispatch(setSnackbarMessage('Error while getting user image URL. Retry later...'));
                                 dispatch(setSnackbarSeverity('error'));
                                 dispatch(toggleSnackbarOpen(true));
+                                setImageLoaded(true);
+                                dispatch(toggleUserImageLoaded(true));
                             })
                     })
                     .catch(error => {
                         dispatch(setSnackbarMessage('Error while uploading user image. Retry later...'));
                         dispatch(setSnackbarSeverity('error'));
                         dispatch(toggleSnackbarOpen(true));
+                        setImageLoaded(true);
+                        dispatch(toggleUserImageLoaded(true));
                     })
             };
         }
@@ -203,18 +221,30 @@ function AccountPage() {
         setEditNickname(false);
     };
 
-    const updateUserDetails = () => {
+    const saveUserDetails = () => {
         setLoading(true);
         updateUserEmail(user, tempEmail.length > 0 ? tempEmail : user.email)
             .then(() => {
                 updateUserProfile(user, tempNickname.length > 0 ? tempNickname : user.displayName)
                     .then(() => {
-                        dispatch(setSnackbarMessage('User details updated!'));
-                        dispatch(setSnackbarSeverity('success'));
-                        dispatch(toggleSnackbarOpen(true));
-                        setEditEmail(false);
-                        setEditNickname(false);
-                        setLoading(false);
+                        let key = Object.entries(userDetails).filter(([key, usr]) => usr.uid === user.uid)[0][0];
+                        updateUserDetails(key, tempNickname.length > 0 ? tempNickname : user.displayName)
+                            .then(() => {
+                                dispatch(setSnackbarMessage('User details updated!'));
+                                dispatch(setSnackbarSeverity('success'));
+                                dispatch(toggleSnackbarOpen(true));
+                                setEditEmail(false);
+                                setEditNickname(false);
+                                setLoading(false);
+                            })
+                            .catch(error => {
+                                dispatch(setSnackbarMessage('Error while updating user details nickname. Retry later...'));
+                                dispatch(setSnackbarSeverity('error'));
+                                dispatch(toggleSnackbarOpen(true));
+                                setEditEmail(false);
+                                setEditNickname(false);
+                                setLoading(false);
+                            });
                     })
                     .catch(error => {
                         dispatch(setSnackbarMessage('Error while updating nickname. Retry later...'));
@@ -237,7 +267,7 @@ function AccountPage() {
 
     return (
         <div className={classes.root}>
-            {user &&
+            {user && userDetails &&
                 <div className={classes.userInfo}>
                     <Tooltip title="Change avatar image" placement="bottom">
                         <IconButton className={classes.buttonAvatar} disableFocusRipple disableRipple component="label" disabled={!imageLoaded}>
@@ -250,7 +280,7 @@ function AccountPage() {
                             <input
                                 type="file"
                                 style={{ display: "none" }}
-                                onChange={uploadFile}
+                                onChange={uploadImage}
                                 accept="image/*"
                             />
                         </IconButton>
@@ -289,6 +319,13 @@ function AccountPage() {
                             </IconButton>
                         </Tooltip>
                         <br />
+                        <Tooltip title="Sballo points" placement="right">
+                            <div className={classes.readOnlyDetailDiv}>
+                                <AttachMoney color="primary" className={classes.detailIcon} />
+                                <Typography>{Object.values(userDetails).filter(el => el.uid === user.uid)[0].points}</Typography>
+                            </div>
+                        </Tooltip>
+                        <br />
                         <Tooltip title="Account creation" placement="right">
                             <div className={classes.readOnlyDetailDiv}>
                                 <CheckCircle color="primary" className={classes.detailIcon} />
@@ -325,7 +362,7 @@ function AccountPage() {
                                     Cancel
                                 </Button>
                                 <div className={classes.saveButtonDiv}>
-                                    <Button className={clsx(classes.actionButton, classes.saveButton)} onClick={updateUserDetails} variant="contained"
+                                    <Button className={clsx(classes.actionButton, classes.saveButton)} onClick={saveUserDetails} variant="contained"
                                         disabled={loading || ((tempEmail === user.email || !VALID_EMAIL.test(tempEmail)) && (tempNickname === user.displayName || (tempNickname.length < NICKNAME_MIN_LENGTH || tempNickname.length > NICKNAME_MAX_LENGTH)))}>
                                         Save
                                     </Button>

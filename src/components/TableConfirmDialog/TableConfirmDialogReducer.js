@@ -2,7 +2,9 @@ import { createReducer } from '@reduxjs/toolkit';
 
 const initialState = {
     open: false,
-    id: undefined
+    id: undefined,
+    mode: 'confirm',
+    table: undefined
 };
 
 const TableConfirmDialogReducer = createReducer(initialState, {
@@ -11,6 +13,12 @@ const TableConfirmDialogReducer = createReducer(initialState, {
     },
     'SET_TABLECONFIRMDIALOG_ID': (state, action) => {
         state.id = action.payload.id;
+    },
+    'SET_TABLECONFIRMDIALOG_MODE': (state, action) => {
+        state.mode = action.payload.mode;
+    },
+    'SET_TABLECONFIRMDIALOG_TABLE': (state, action) => {
+        state.table = action.payload.table;
     },
 })
 

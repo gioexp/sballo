@@ -5,7 +5,7 @@ import SnackbarReducer from '../../components/Snackbar/SnackbarReducer';
 import TableConfirmDialogReducer from '../../components/TableConfirmDialog/TableConfirmDialogReducer';
 import LoginDialogReducer from '../../components/LoginDialog/LoginDialogReducer'; 
 import HeaderReducer from '../../components/Header/HeaderReducer';
-import GameTablesReducer from '../../components/GameTablesDialog/GameTablesDialogReducer';
+import GameTablesDialogReducer from '../../components/GameTablesDialog/GameTablesDialogReducer';
 
 const reducers = combineReducers({
   HallPageReducer,
@@ -14,7 +14,7 @@ const reducers = combineReducers({
   TableConfirmDialogReducer,
   LoginDialogReducer,
   HeaderReducer,
-  GameTablesReducer
+  GameTablesDialogReducer
 });
 
 const store = createStore(reducers);

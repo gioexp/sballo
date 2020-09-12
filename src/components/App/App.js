@@ -35,9 +35,9 @@ function App() {
             <ThemeProvider theme={theme}>
                 <LoginDialog />
                 <CreateTableDialog />
-                <TableConfirmDialog />
                 <Snackbar />
                 <GameTablesDialog />
+                <TableConfirmDialog />
                 <Router history={history}>
                     <Header history={history} />
                     <Switch>

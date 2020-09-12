@@ -8,7 +8,7 @@ import {
 } from '@material-ui/core';
 import { AttachMoney, Add, CheckCircle, VideogameAsset, ControlPoint, Group, Timer, AccessTime } from '@material-ui/icons';
 import moment from 'moment';
-import { toggleTableConfirmDialog, setTableConfirmDialogId } from '../TableConfirmDialog/TableConfirmDialogAction';
+import { toggleTableConfirmDialog, setTableConfirmDialogId, setTableConfirmDialogMode, setTableConfirmDialogTable } from '../TableConfirmDialog/TableConfirmDialogAction';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import { green, grey } from '@material-ui/core/colors';
 import { toggleGameTablesDialog } from '../GameTablesDialog/GameTablesDialogAction';
@@ -27,30 +27,34 @@ const useStyles = makeStyles((theme) => ({
         alignSelf: 'flex-end',
         bottom: '6em',
         right: '2em',
-        borderWidth: 3,
         borderRadius: '50%',
-        borderColor: theme.palette.primary.main,
         height: '4.5em',
         width: '4em',
         boxShadow: '0px 8px 15px rgba(0, 0, 0, 0.2)',
+        backgroundColor: theme.palette.primary.main,
         '&:hover': {
-            borderWidth: 3,
-        },
+            backgroundColor: theme.palette.primary.main
+        }
+    },
+    addIcon: {
+        color: 'white'
     },
     gameTablesButton: {
         position: 'absolute',
         alignSelf: 'flex-end',
         bottom: '12em',
         right: '2em',
-        borderWidth: 3,
         borderRadius: '50%',
-        borderColor: theme.palette.primary.main,
         height: '4.5em',
         width: '4em',
         boxShadow: '0px 8px 15px rgba(0, 0, 0, 0.2)',
+        backgroundColor: theme.palette.primary.main,
         '&:hover': {
-            borderWidth: 3,
+            backgroundColor: theme.palette.primary.main
         },
+    },
+    gameTablesIcon: {
+        color: 'white'
     },
     list: {
         width: '50%'
@@ -77,7 +81,7 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'center',
     },
-    infoTableText:{
+    infoTableText: {
         color: 'rgba(0, 0, 0, 0.54)'
     },
     timePlayDiv: {
@@ -153,6 +157,8 @@ function HallPage() {
             if (user && user.emailVerified) {
                 if (!table.participants.includes(user.uid)) {
                     dispatch(setTableConfirmDialogId(key));
+                    dispatch(setTableConfirmDialogTable(table));
+                    dispatch(setTableConfirmDialogMode('confirm'));
                     dispatch(toggleTableConfirmDialog(true));
                 }
                 else {
@@ -168,9 +174,22 @@ function HallPage() {
             }
         }
         else {
-            dispatch(setSnackbarMessage('Table is full. Try with another one.'));
-            dispatch(setSnackbarSeverity('warning'));
-            dispatch(toggleSnackbarOpen(true));
+            if (user && user.emailVerified) {
+                if (!table.participants.includes(user.uid)) {
+                    dispatch(setSnackbarMessage('Table is full. Try with another one.'));
+                    dispatch(setSnackbarSeverity('warning'));
+                    dispatch(toggleSnackbarOpen(true));
+                }
+                else {
+                    dispatch(toggleGameTablesDialog(true));
+                }
+            }
+            else {
+                dispatch(setSnackbarMessage('Before join table please login or verify your email. Thanks'));
+                dispatch(setSnackbarSeverity('warning'));
+                dispatch(toggleSnackbarOpen(true));
+            }
+            
         }
     };
 
@@ -250,14 +269,14 @@ function HallPage() {
             <Tooltip title="Create new table" placement="left">
                 <Button variant="outlined" color="primary" className={classes.addButton}
                     onClick={addButtonClick}>
-                    <Add fontSize="large" />
+                    <Add fontSize="large" className={classes.addIcon}/>
                 </Button>
             </Tooltip>
-            {tables && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
+            {tables && user && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
                 <Tooltip title="Go to game tables" placement="left">
                     <Button variant="outlined" color="primary" className={classes.gameTablesButton}
                         onClick={openGameTables}>
-                        <VideogameAsset fontSize="large" />
+                        <VideogameAsset fontSize="large" className={classes.gameTablesIcon}/>
                     </Button>
                 </Tooltip>}
         </div>

@@ -116,7 +116,7 @@ function LoginDialog() {
             .then(result => {
                 updateUserProfile(result.user, nickName)
                     .then(() => {
-                        let userDetail = { uid: result.user.uid, points: START_POINTS };
+                        let userDetail = { uid: result.user.uid, points: START_POINTS, displayName: nickName };
                         insertFirebase('userDetails', userDetail)
                             .then(() => {
                                 sendEmailVerification(result.user)

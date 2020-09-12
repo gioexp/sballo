@@ -18,7 +18,6 @@ export const initFirebaseRedux = (dispatch) => {
         let newVal = snap.val();
         if (newVal) dispatch(setUserDetails(newVal));
         else dispatch(setUserDetails({}));
-        console.log(newVal)
     });
 
     firebase.auth().onAuthStateChanged(function (user) {
@@ -35,7 +34,13 @@ export const insertFirebase = (child, data) => {
     return childRef.update(newObject);
 }
 
-export const updateTableParticipantsFirebase = (id, userUid, players) => {
+export const deleteFirebase = (child, id) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child(child + '/' + id);
+    return childRef.remove();
+}
+
+export const insertTableParticipantsFirebase = (id, userUid, players) => {
     const rootRef = firebase.database().ref();
     const childRef = rootRef.child('tables/' + id + '/participants');
     return childRef.transaction(function update(participants) {
@@ -43,6 +48,15 @@ export const updateTableParticipantsFirebase = (id, userUid, players) => {
             if (participants.length < players) participants.push(userUid);
             else return;  // abort transaction
         }
+        return participants;
+    });
+}
+
+export const removeTableParticipantsFirebase = (id, userUid) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id + '/participants');
+    return childRef.transaction(function update(participants) {
+        if (participants) participants = participants.filter(uid => uid !== userUid);
         return participants;
     });
 }
@@ -81,4 +95,13 @@ export const updateUserEmail = (user, email) => {
 export const uploadUserImage = (user, image) => {
     if (user) return firebase.storage().ref("sballo/" + user.uid + "/avatar.png").putString(image, 'data_url');
     else return new Promise.reject("invalid user");
+}
+
+export const updateUserDetails = (key, displayName, photoURL) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('userDetails/' + key);
+    let newVal = {};
+    if (displayName) newVal.displayName = displayName;
+    if (photoURL) newVal.photoURL = photoURL;
+    return childRef.update(newVal);
 }
