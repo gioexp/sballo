@@ -23,6 +23,9 @@ const GameTablesDialogReducer = createReducer(initialState, {
             state.countdowns.push(newObj);
         }
     },
+    'RESET_GAMETABLESDIALOG_COUNTDOWNS': (state, action) => {
+        state.countdowns = state.countdowns.filter(el => el.key !== action.payload.key);
+    }
 })
 
 export default GameTablesDialogReducer;

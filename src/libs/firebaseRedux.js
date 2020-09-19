@@ -2,6 +2,7 @@ import * as firebase from 'firebase';
 import { firebaseConfig } from '../firebaseConfig';
 import { setTables } from '../components/HallPage/HallPageAction';
 import { setUserLoggedIn, setUserDetails } from '../components/LoginDialog/LoginDialogAction';
+import { determinateSubTurnWinnerIndex } from './gameLogic';
 
 export const initFirebaseRedux = (dispatch) => {
     firebase.initializeApp(firebaseConfig);
@@ -58,6 +59,90 @@ export const removeTableParticipantsFirebase = (id, userUid) => {
     return childRef.transaction(function update(participants) {
         if (participants) participants = participants.filter(uid => uid !== userUid);
         return participants;
+    });
+}
+
+export const setTableDeclarationsFirebase = (id, round, playerIndex, declaration) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id + '/declarations');
+    return childRef.transaction(function update(declarations) {
+        if (declarations) declarations[round][playerIndex] = declaration;
+        return declarations;
+    });
+}
+
+export const changeTurnFirebase = (id, newTurnIndex) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id + '/turnIndex');
+    return childRef.transaction(function update(turnIndex) {
+        if (turnIndex) turnIndex = newTurnIndex;
+        return turnIndex;
+    });
+}
+
+export const setTableClockFirebase = (id, newClock) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id + '/clock');
+    return childRef.transaction(function update(clock) {
+        if (clock) clock = newClock;
+        return clock;
+    });
+}
+
+export const declarePassTurnAndCleanAbsence = (id, round, playerIndex, declaration, newTurnIndex, newClock) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id);
+    return childRef.transaction(function update(table) {
+        if (table) {
+            table.declarations[round][playerIndex] = declaration;
+            table.turnIndex = newTurnIndex;
+            table.clock = newClock;
+            if (table.absencePlayerManager) delete table.absencePlayerManager;
+        }
+        return table;
+    });
+}
+
+export const playCardPassTurnAndCleanAbsence = (id, round, subRound, card, newTurnIndex, newClock) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id);
+    return childRef.transaction(function update(table) {
+        if (table) {
+            table.playedCards[round][subRound][table.playedCards[round][subRound].indexOf(-1)] = card;
+            table.turnIndex = newTurnIndex;
+            table.clock = newClock;
+            if (table.absencePlayerManager) delete table.absencePlayerManager;
+
+            if (table.playedCards[round][subRound].every(card => card !== -1)) {
+                // everybody played their cards, now determinate who won 
+                let winnerIndex = determinateSubTurnWinnerIndex(table);
+                table.points[table.round][winnerIndex]++;
+                // change subRound
+                if (subRound === (table.shifts[round][0].length - 1)) {
+                    table.subRound = 0;
+                    table.round++;
+                    table.initialTurnIndex = (table.initialTurnIndex + 1) % table.players;
+                    table.turnIndex = table.initialTurnIndex;
+                }
+                else {
+                    table.turnIndex = winnerIndex;
+                    table.subRound++;
+                }
+            }
+        }
+        return table;
+    });
+}
+
+export const signalAbsence = (id, uid) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id);
+    return childRef.transaction(function update(table) {
+        if (table) {
+            if (!table.absencePlayerManager) table.absencePlayerManager = uid;
+            else return;
+        }
+        return table;
     });
 }
 

@@ -62,7 +62,8 @@ function CreateTableDialog() {
 
     const tableNameFormError = tableName.length < TABLENAME_MIN_LENGTH || tableName.length > TABLENAME_MAX_LENGTH;
     const betNegativeFormError = bet < 0;
-    const betEnoughFormError = user && !_.isEmpty(userDetails) && bet > Object.values(userDetails).filter(el => el.uid === user.uid)[0].points;
+    const betEnoughFormError = user && !_.isEmpty(userDetails) && bet > (Object.values(userDetails).filter(el => el.uid === user.uid).length > 0 ?
+        Object.values(userDetails).filter(el => el.uid === user.uid)[0].points : 0);
     const playersFormError = !PLAYERS_VALUES.includes(players);
     const timeFormError = !TIME_VALUES.includes(timeToPlay);
 

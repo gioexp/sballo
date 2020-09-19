@@ -41,3 +41,8 @@ export const PLAYERS_VALUES = [2, 3, 4, 5, 6, 7, 8];
 export const TIME_VALUES = [15, 30, 45, 60];
 
 export const START_POINTS = 100;
+
+export const HEARTS_CARDS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+export const DIAMONDS_CARDS = [13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25];
+export const CLUBS_CARDS = [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38];
+export const SPADES_CARDS = [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51];
