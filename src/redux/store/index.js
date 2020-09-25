@@ -6,6 +6,7 @@ import TableConfirmDialogReducer from '../../components/TableConfirmDialog/Table
 import LoginDialogReducer from '../../components/LoginDialog/LoginDialogReducer'; 
 import HeaderReducer from '../../components/Header/HeaderReducer';
 import GameTablesDialogReducer from '../../components/GameTablesDialog/GameTablesDialogReducer';
+import ScoreboardReducer from '../../components/Scoreboard/ScoreboardReducer';
 
 const reducers = combineReducers({
   HallPageReducer,
@@ -14,7 +15,8 @@ const reducers = combineReducers({
   TableConfirmDialogReducer,
   LoginDialogReducer,
   HeaderReducer,
-  GameTablesDialogReducer
+  GameTablesDialogReducer,
+  ScoreboardReducer
 });
 
 const store = createStore(reducers);

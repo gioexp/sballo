@@ -1,124 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { makeStyles } from '@material-ui/core/styles';
-import { toggleCreateTableDialog } from '../CreateTableDialog/CreateTableDialogAction';
 import {
-    Button, List, ListItem, ListItemText, Divider, CircularProgress, ListItemIcon, ListItemSecondaryAction,
+    List, ListItem, ListItemText, Divider, CircularProgress, ListItemIcon, ListItemSecondaryAction,
     Typography, Tooltip, Hidden
 } from '@material-ui/core';
-import { AttachMoney, Add, CheckCircle, VideogameAsset, ControlPoint, Group, Timer, AccessTime } from '@material-ui/icons';
+import { AttachMoney, CheckCircle, ControlPoint, Group, Timer, AccessTime } from '@material-ui/icons';
 import moment from 'moment';
 import { toggleTableConfirmDialog, setTableConfirmDialogId, setTableConfirmDialogMode, setTableConfirmDialogTable } from '../TableConfirmDialog/TableConfirmDialogAction';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
-import { green, grey } from '@material-ui/core/colors';
 import { toggleGameTablesDialog } from '../GameTablesDialog/GameTablesDialogAction';
 import _ from 'lodash';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        minHeight: '50.55em',
-    },
-    addButton: {
-        position: 'absolute',
-        alignSelf: 'flex-end',
-        bottom: '6em',
-        right: '2em',
-        borderRadius: '50%',
-        height: '4.5em',
-        width: '4em',
-        boxShadow: '0px 8px 15px rgba(0, 0, 0, 0.2)',
-        backgroundColor: theme.palette.primary.main,
-        '&:hover': {
-            backgroundColor: theme.palette.primary.main
-        }
-    },
-    addIcon: {
-        color: 'white'
-    },
-    gameTablesButton: {
-        position: 'absolute',
-        alignSelf: 'flex-end',
-        bottom: '12em',
-        right: '2em',
-        borderRadius: '50%',
-        height: '4.5em',
-        width: '4em',
-        boxShadow: '0px 8px 15px rgba(0, 0, 0, 0.2)',
-        backgroundColor: theme.palette.primary.main,
-        '&:hover': {
-            backgroundColor: theme.palette.primary.main
-        },
-    },
-    gameTablesIcon: {
-        color: 'white'
-    },
-    list: {
-        width: '50%'
-    },
-    loading: {
-        marginTop: '13%'
-    },
-    secondaryAction: {
-        display: 'inline-flex',
-    },
-    greyText: {
-        color: 'rgba(0, 0, 0, 0.54)',
-    },
-    betDiv: {
-        marginTop: '0.25em',
-        marginRight: '3em',
-    },
-    playersDiv: {
-        marginTop: '0.25em',
-        marginRight: '3em',
-    },
-    infoTableIcon: {
-        width: '2em',
-        display: 'flex',
-        justifyContent: 'center',
-    },
-    infoTableText: {
-        color: 'rgba(0, 0, 0, 0.54)'
-    },
-    timePlayDiv: {
-        marginTop: '0.25em',
-        marginRight: '6em',
-    },
-    createdDiv: {
-        marginTop: '0.25em'
-    },
-    checkIconDiv: {
-        marginTop: '0.4em',
-        marginRight: '3em',
-    },
-    checkIcon: {
-        color: green[500]
-    },
-    noTablesDiv: {
-        width: '100%',
-        marginTop: '13%'
-    },
-    noTables: {
-        display: 'flex',
-        justifyContent: 'center',
-        color: grey[500],
-        fontWeight: 'bold'
-    },
-    noTablesIconDiv: {
-        display: 'inline-flex',
-        width: '100%',
-        justifyContent: 'center'
-    },
-    noTablesIcon: {
-        color: grey[500],
-        marginLeft: '0.5%',
-        marginTop: '0.2%'
-    }
-}));
+import { useStyles } from './HallPageCss';
 
 function HallPage() {
     const classes = useStyles();
@@ -133,24 +25,6 @@ function HallPage() {
         }, 60000);
         return () => clearInterval(interval);
     }, []);
-
-    const addButtonClick = () => {
-        if (user && user.emailVerified) dispatch(toggleCreateTableDialog(true));
-        else {
-            dispatch(setSnackbarMessage('Before create table please login or verify your email. Thanks'));
-            dispatch(setSnackbarSeverity('warning'));
-            dispatch(toggleSnackbarOpen(true));
-        }
-    };
-
-    const openGameTables = () => {
-        if (user && user.emailVerified) dispatch(toggleGameTablesDialog(true));
-        else {
-            dispatch(setSnackbarMessage('Before entering in game tables please login or verify your email. Thanks'));
-            dispatch(setSnackbarSeverity('warning'));
-            dispatch(toggleSnackbarOpen(true));
-        }
-    };
 
     const openTableConfirm = (key, table) => {
         if (table.participants.length < table.players) {
@@ -189,7 +63,7 @@ function HallPage() {
                 dispatch(setSnackbarSeverity('warning'));
                 dispatch(toggleSnackbarOpen(true));
             }
-            
+
         }
     };
 
@@ -266,19 +140,6 @@ function HallPage() {
                     </div>
                 </div>
             }
-            <Tooltip title="Create new table" placement="left">
-                <Button variant="outlined" color="primary" className={classes.addButton}
-                    onClick={addButtonClick}>
-                    <Add fontSize="large" className={classes.addIcon}/>
-                </Button>
-            </Tooltip>
-            {tables && user && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
-                <Tooltip title="Go to game tables" placement="left">
-                    <Button variant="outlined" color="primary" className={classes.gameTablesButton}
-                        onClick={openGameTables}>
-                        <VideogameAsset fontSize="large" className={classes.gameTablesIcon}/>
-                    </Button>
-                </Tooltip>}
         </div>
     );
 }

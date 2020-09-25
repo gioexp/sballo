@@ -5,44 +5,13 @@ import {
 } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleCreateTableDialog } from './CreateTableDialogAction';
-import { makeStyles } from '@material-ui/core/styles';
 import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH, PLAYERS_VALUES, TIME_VALUES } from '../../libs/constants';
 import clsx from 'clsx';
 import { insertFirebase } from '../../libs/firebaseRedux';
 import moment from 'moment';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import _ from 'lodash';
-
-const useStyles = makeStyles((theme) => ({
-    title: {
-        color: theme.palette.primary.main,
-    },
-    actionButton: {
-        textTransform: 'none'
-    },
-    formControl: {
-        width: '100%',
-    },
-    marginBottom: {
-        marginBottom: '1em'
-    },
-    textField: {
-        width: '100%',
-        marginRight: 0,
-        marginLeft: 0
-    },
-    checkBoxesDiv: {
-        display: 'inline-flex',
-        marginTop: '1em',
-    },
-    checkBoxesLabel: {
-        marginTop: '0.79em',
-        paddingRight: '2.5em'
-    },
-    loadingBar: {
-        width: '100%',
-    }
-}));
+import { useStyles } from './CreateTableDialogCss';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;

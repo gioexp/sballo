@@ -2,32 +2,11 @@ import React, { useState } from 'react';
 import {
     Button, Dialog, DialogActions, DialogContent, DialogTitle, Slide, LinearProgress, Typography
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleTableConfirmDialog } from './TableConfirmDialogAction';
 import { insertTableParticipantsFirebase, deleteFirebase, removeTableParticipantsFirebase } from '../../libs/firebaseRedux';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
-
-const useStyles = makeStyles((theme) => ({
-    title: {
-        color: theme.palette.primary.main,
-    },
-    actionButton: {
-        textTransform: 'none'
-    },
-    loadingBar: {
-        width: '100%',
-    },
-    buttonConfirmDiv: {
-        width: '100%',
-        display: 'flex',
-        justifyContent: 'center',
-        marginTop: '2em'
-    },
-    buttonConfirm: {
-        width: '50%'
-    },
-}));
+import { useStyles } from './TableConfirmDialogCss';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;

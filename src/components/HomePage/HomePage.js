@@ -1,14 +1,5 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        flexGrow: 1,
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '50.55em',
-    }
-}));
+import { useStyles } from './HomePageCss';
 
 function HomePage() {
     const classes = useStyles();

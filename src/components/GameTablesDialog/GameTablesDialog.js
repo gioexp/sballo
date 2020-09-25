@@ -1,20 +1,21 @@
-import React, { useEffect, useRef } from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import React, { useEffect, useRef, cloneElement } from 'react';
 import {
     Dialog, AppBar, Toolbar, IconButton, Typography, Slide, Card, CardHeader, CardContent, CardActions,
-    Tooltip, Avatar, CircularProgress, Button, Checkbox, FormControlLabel
+    Tooltip, Avatar, CircularProgress, Button, Checkbox, FormControlLabel, useScrollTrigger
 } from '@material-ui/core';
-import { Close, DeleteOutline, AttachMoney, Group, Timer, DirectionsRun, PlayCircleFilled, PauseCircleFilled, Face, FiberManualRecord } from '@material-ui/icons';
+import { Close, DeleteOutline, AttachMoney, Group, Timer, DirectionsRun, PlayCircleFilled, PauseCircleFilled, Face, FiberManualRecord, Poll } from '@material-ui/icons';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleGameTablesDialog, setGameTablesDialogCountdowns, resetGameTablesDialogCountdowns } from './GameTablesDialogAction';
 import clsx from 'clsx';
 import { toggleTableConfirmDialog, setTableConfirmDialogId, setTableConfirmDialogMode, setTableConfirmDialogTable } from '../TableConfirmDialog/TableConfirmDialogAction';
-import PokerTable from '../../images/poker_table.jpg';
-import { green, grey, yellow } from '@material-ui/core/colors';
 import moment from 'moment';
-import { declarePassTurnAndCleanAbsence, signalAbsence, playCardPassTurnAndCleanAbsence } from '../../libs/firebaseRedux';
+import { declarePassTurnAndCleanAbsence, signalAbsence, playCardAndCleanAbsence, passTurn, openScoreBoard } from '../../libs/firebaseRedux';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
-import { getJollySeed, mayIPlayThisCard, selectOneCardToPlay } from '../../libs/gameLogic';
+import { getJollySeed, mayIPlayThisCard, selectOneCardToPlay, determinateSubTurnWinnerIndex } from '../../libs/gameLogic';
+import { SCOREBOARD_TIME } from '../../libs/constants';
+import Scoreboard from '../Scoreboard/Scoreboard';
+import { toggleScoreboard } from '../Scoreboard/ScoreboardAction';
+import { useStyles } from './GameTablesDialogCss';
 
 function importAll(r) {
     let images = {};
@@ -24,343 +25,81 @@ function importAll(r) {
 
 const playCardImages = importAll(require.context('../../images/cards', false, /\.(png|jpe?g|svg)$/));
 
-const useStyles = makeStyles((theme) => ({
-    appBar: {
-        position: 'relative',
-    },
-    title: {
-        display: 'flex',
-        justifyContent: 'center',
-        width: '96%'
-    },
-    card: {
-        width: '95%',
-        marginBottom: '1%'
-    },
-    cardDiv: {
-        display: 'flex',
-        width: '100%',
-        justifyContent: 'center'
-    },
-    firstCardDiv: {
-        marginTop: '1%'
-    },
-    cardActionInfoDiv: {
-        display: 'inline-flex'
-    },
-    cardActionPlayersText: {
-        marginLeft: '20%'
-    },
-    cardActionTimePlayText: {
-        marginLeft: '10%'
-    },
-    cardActionSecondsDiv: {
-        marginLeft: '2% !important'
-    },
-    cardContent: {
-        backgroundImage: "url(" + PokerTable + ")",
-        backgroundRepeat: 'no-repeat',
-        backgroundPosition: 'center',
-        backgroundPositionY: '30%',
-        backgroundSize: '45%',
-        height: '40em'
-    },
-    playIcon: {
-        color: green[500],
-        fontSize: '3em'
-    },
-    pauseIcon: {
-        color: grey[500],
-        fontSize: '3em'
-    },
-    avatarDiv: {
-        display: 'flex',
-        alignItems: 'center',
-        flexDirection: 'column',
-    },
-    avatar: {
-        width: '3em',
-        height: '3em',
-        backgroundColor: 'transparent'
-    },
-    left: {
-        marginTop: '13.9%',
-        marginLeft: '-43%'
-    },
-    topLeft: {
-        marginTop: '-17%',
-        marginLeft: '-22%'
-    },
-    top: {
-        marginTop: '-4.7%'
-    },
-    topRight: {
-        marginTop: '-4.7%',
-        marginLeft: '22%'
-    },
-    right: {
-        marginLeft: '42.4%',
-        marginTop: '7.5%'
-    },
-    bottomRight: {
-        marginLeft: '22%',
-        marginTop: '6.5%'
-    },
-    bottom: {
-        marginTop: '-4.7%'
-    },
-    bottomLeft: {
-        marginLeft: '-22%',
-        marginTop: '-4.7%'
-    },
-    avatarName: {
-        backgroundColor: theme.palette.primary.main,
-        paddingLeft: '0.3%',
-        paddingRight: '0.3%',
-        borderRadius: '30px',
-        color: 'white'
-    },
-    avatarIcon: {
-        fontSize: '3em'
-    },
-    avatarCircularProgress: {
-        position: 'absolute',
-        marginTop: '-0.1%',
-        color: grey[500]
-    },
-    declarationIconDiv: {
-        position: 'absolute',
-        marginTop: '1.7%',
-        marginLeft: '2%'
-    },
-    declarationIconText: {
-        color: 'white',
-        display: 'flex',
-        marginTop: '6%',
-        paddingTop: '6%',
-        fontWeight: 'bold',
-        justifyContent: 'center',
-        backgroundColor: green[500],
-        width: '138%',
-        borderRadius: '1em'
-    },
-    cardHeaderTitle: {
-        fontSize: 25
-    },
-    cardHeaderSubheader: {
-        fontSize: 16
-    },
-    countdownDiv: {
-        height: '35em',
-        position: 'absolute',
-        zIndex: 1,
-        width: '93.3%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    circularCountdown: {
-        color: 'white'
-    },
-    circularLabel: {
-        position: 'absolute',
-        color: 'white'
-    },
-    playCardsDiv: {
-        position: 'absolute',
-        display: 'flex',
-        zIndex: 1,
-    },
-    playCardButton: {
-        width: '3em',
-        height: '7em'
-    },
-    playCardImage: {
-        width: '132%'
-    },
-    round0Left: {
-        marginLeft: '17.5%',
-        marginTop: '12.5%'
-    },
-    round1Left: {
-        marginLeft: '14%',
-        marginTop: '12.5%'
-    },
-    round2Left: {
-        marginLeft: '11%',
-        marginTop: '12.5%'
-    },
-    round3Left: {
-        marginLeft: '7.5%',
-        marginTop: '12.5%'
-    },
-    round4Left: {
-        marginLeft: '4.3%',
-        marginTop: '12.5%'
-    },
-    round0TopLeft: {
-        marginTop: '1%',
-        marginLeft: '27.5%'
-    },
-    round1TopLeft: {
-        marginTop: '1%',
-        marginLeft: '24%'
-    },
-    round2TopLeft: {
-        marginTop: '1%',
-        marginLeft: '20.5%'
-    },
-    round3TopLeft: {
-        marginTop: '1%',
-        marginLeft: '17.2%'
-    },
-    round4TopLeft: {
-        marginTop: '1%',
-        marginLeft: '14%'
-    },
-    round0Top: {
-        marginTop: '-4%',
-        marginLeft: '43.5%'
-    },
-    round1Top: {
-        marginTop: '-4%',
-        marginLeft: '41.5%'
-    },
-    round2Top: {
-        marginTop: '-4%',
-        marginLeft: '40%'
-    },
-    round3Top: {
-        marginTop: '-4%',
-        marginLeft: '38.2%'
-    },
-    round4Top: {
-        marginTop: '-4%',
-        marginLeft: '36.5%'
-    },
-    round0TopRight: {
-        marginTop: '1.2%',
-        marginLeft: '59%'
-    },
-    round0Right: {
-        marginTop: '12.6%',
-        marginLeft: '68.6%'
-    },
-    round0BottomRight: {
-        marginTop: '23%',
-        marginLeft: '59%'
-    },
-    round0Bottom: {
-        marginTop: '28.3%',
-        marginLeft: '43.5%'
-    },
-    round1Bottom: {
-        marginTop: '28.3%',
-        marginLeft: '41.5%'
-    },
-    round2Bottom: {
-        marginTop: '28.3%',
-        marginLeft: '40%'
-    },
-    round3Bottom: {
-        marginTop: '28.3%',
-        marginLeft: '38.2%'
-    },
-    round4Bottom: {
-        marginTop: '28.3%',
-        marginLeft: '36.5%'
-    },
-    round0BottomLeft: {
-        marginTop: '23.2%',
-        marginLeft: '27.5%'
-    },
-    round1BottomLeft: {
-        marginTop: '23.2%',
-        marginLeft: '24%'
-    },
-    round2BottomLeft: {
-        marginTop: '23.2%',
-        marginLeft: '20.5%'
-    },
-    round3BottomLeft: {
-        marginTop: '23.2%',
-        marginLeft: '17.2%'
-    },
-    round4BottomLeft: {
-        marginTop: '23.2%',
-        marginLeft: '14%'
-    },
-    declarationDiv: {
-        height: '35em',
-        position: 'absolute',
-        width: '93.3%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    declarationCheckboxDiv: {
-        marginTop: '2%'
-    },
-    declarationText: {
-        position: 'absolute',
-        color: 'white',
-        marginTop: '-1%'
-    },
-    declarationCheckbox: {
-        color: 'white'
-    },
-    jollyDiv: {
-        position: 'absolute',
-        display: 'flex',
-        marginTop: '11%',
-        marginLeft: '33%'
-    },
-    jollyImage: {
-        width: '1.2em',
-        display: 'flex',
-        zIndex: 1,
-        position: 'absolute'
-    },
-    jollyIcon: {
-        fontSize: '3em',
-        color: yellow[500],
-        position: 'absolute',
-        display: 'flex',
-    },
-    jollyTooltipDiv: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center'
-    },
-    playedCardsDiv: {
-        height: '35em',
-        position: 'absolute',
-        width: '93.3%',
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    playedCardImage: {
-        width: '3.56%',
-        margin: '0.1%'
-    },
-}));
-
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
 });
 
-function GameTablesDialog() {
+function ElevationScroll(props) {
+    const { children } = props;
+    const trigger = useScrollTrigger({
+        disableHysteresis: true,
+        threshold: 0,
+    });
+
+    return cloneElement(children, {
+        elevation: trigger ? 4 : 4,
+    });
+};
+
+function GameTablesDialog(props) {
     const classes = useStyles();
     const open = useSelector(state => state.GameTablesDialogReducer.open);
     const countdowns = useSelector(state => state.GameTablesDialogReducer.countdowns);
     const tables = useSelector(state => state.HallPageReducer.tables);
     const user = useSelector(state => state.LoginDialogReducer.user);
     const userDetails = useSelector(state => state.LoginDialogReducer.userDetails);
+    const openScoreboard = useSelector(state => state.ScoreboardReducer.open);
     const dispatch = useDispatch();
     const startedTables = useRef([]);
+    const lockCards = useRef(false);
+
+    const calculateTimeBeforePassingTurn = (table) => {
+        if (table.playedCards[table.round][table.subRound].filter(card => card === -1).length === 1) return 3000;
+        else return 0;
+    };
 
     useEffect(() => {
+        function scoreBoardIntervalFunc(table, key) {
+            dispatch(resetGameTablesDialogCountdowns(key));
+            if (moment().utc().isSameOrAfter(moment(new Date(table.clock)))) {
+                clearInterval(startedTables.current.filter(el => el.key === key)[0].interval);
+                startedTables.current = startedTables.current.filter(el => el.key !== key);
+
+                if (table.turnIndex === table.participants.indexOf(user.uid)) {
+                    let newTurnIndex = (table.turnIndex + 1) % table.players;
+                    let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
+                    passTurn(key, table.round, table.subRound, newTurnIndex, newClock)
+                        .then(() => {
+                            lockCards.current = false;
+                        })
+                        .catch(error => {
+                            // retry until is done
+                        });
+                }
+                else {
+                    signalAbsence(key, user.uid)
+                        .then(result => {
+                            if (result.committed) {
+                                setTimeout(() => {
+                                    if (table.scoreBoardOpen) {
+                                        // no one closed the scoreBoard after additional 2 secs
+                                        let newTurnIndex = (table.turnIndex + 1) % table.players;
+                                        let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
+                                        passTurn(key, table.round, table.subRound, newTurnIndex, newClock)
+                                            .then(() => {
+                                                lockCards.current = false;
+                                            })
+                                            .catch(error => {
+                                                // retry until is done
+                                            });
+                                    }
+                                }, 2000);
+                            }
+                        })
+                }
+            }
+        }
+
         function answerIntervalFunc(table, key) {
             dispatch(setGameTablesDialogCountdowns({ key: key, started: table.clock }));
             if (moment().utc().isSameOrAfter(moment(new Date(table.clock)))) {
@@ -383,10 +122,35 @@ function GameTablesDialog() {
                             });
                     }
                     else {
+                        lockCards.current = true;
                         let card = selectOneCardToPlay(table);
-                        let newTurnIndex = (table.turnIndex + 1) % table.players;
-                        let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
-                        playCardPassTurnAndCleanAbsence(key, table.round, table.subRound, card, newTurnIndex, newClock)
+                        playCardAndCleanAbsence(key, table.round, table.subRound, card)
+                            .then(() => {
+                                setTimeout(() => {
+                                    if (table.playedCards[table.round].flat().filter(card => card === -1).length === 1) {
+                                        let newClock = moment().add(SCOREBOARD_TIME, 'seconds').utc().toString();
+                                        openScoreBoard(key, newClock)
+                                            .then(() => {
+                                                lockCards.current = false;
+                                            })
+                                            .catch(error => {
+                                                // retry until is done
+                                            });
+                                    }
+                                    else {
+                                        let newTurnIndex = (table.turnIndex + 1) % table.players;
+                                        let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
+                                        passTurn(key, table.round, table.subRound, newTurnIndex, newClock)
+                                            .then(() => {
+                                                lockCards.current = false;
+                                            })
+                                            .catch(error => {
+                                                // retry until is done
+                                            });
+                                    }
+
+                                }, calculateTimeBeforePassingTurn(table));
+                            })
                             .catch(error => {
                                 // retry until is done
                             });
@@ -400,7 +164,7 @@ function GameTablesDialog() {
                                 // I am the user that play instead of missing player
                                 setTimeout(() => {
                                     if (startedTables.current.filter(el => el.key === key).length === 0) {
-                                        // no one answer after 5 additional seconds of wait
+                                        // no one answer after 3 additional seconds of wait
                                         if (table.declarations[table.round][table.turnIndex] === -1) {
                                             let playerIndex = table.turnIndex;
                                             let newTurnIndex = (table.turnIndex + 1) % table.players;
@@ -412,15 +176,36 @@ function GameTablesDialog() {
                                         }
                                         else {
                                             let card = selectOneCardToPlay(table);
-                                            let newTurnIndex = (table.turnIndex + 1) % table.players;
-                                            let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
-                                            playCardPassTurnAndCleanAbsence(key, table.round, table.subRound, card, newTurnIndex, newClock)
+                                            playCardAndCleanAbsence(key, table.round, table.subRound, card)
+                                                .then(() => {
+                                                    setTimeout(() => {
+                                                        if (table.playedCards[table.round].flat().filter(card => card === -1).length === 1) {
+                                                            let newClock = moment().add(SCOREBOARD_TIME, 'seconds').utc().toString();
+                                                            openScoreBoard(key, newClock)
+                                                                .then(() => {
+                                                                    lockCards.current = false;
+                                                                })
+                                                                .catch(error => {
+                                                                    // retry until is done
+                                                                });
+                                                        }
+                                                        else {
+                                                            let newTurnIndex = (table.turnIndex + 1) % table.players;
+                                                            let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
+                                                            passTurn(key, table.round, table.subRound, newTurnIndex, newClock)
+                                                                .catch(error => {
+                                                                    // retry until is done
+                                                                });
+                                                        }
+
+                                                    }, calculateTimeBeforePassingTurn(table));
+                                                })
                                                 .catch(error => {
                                                     // retry until is done
                                                 });
                                         }
                                     }
-                                }, 5000);
+                                }, 3000);
                             }
                         })
                         .catch(error => {
@@ -462,10 +247,20 @@ function GameTablesDialog() {
                 }
 
                 if (startedArray[i].table.clock && moment().utc().isSameOrAfter(moment(new Date(startedArray[i].table.started)))
-                    && !moment().utc().isSameOrAfter(moment(new Date(startedArray[i].table.clock)))) {
+                    && !moment().utc().isSameOrAfter(moment(new Date(startedArray[i].table.clock))) && !startedArray[i].table.scoreBoardOpen) {
                     if (!startedTables.current.map(el => el.key).includes(startedArray[i].key)) {
                         let newObj = {
                             key: startedArray[i].key, interval: setInterval(answerIntervalFunc, 1000, startedArray[i].table, startedArray[i].key)
+                        };
+                        startedTables.current.push(newObj);
+                    }
+                }
+
+                if (startedArray[i].table.clock && moment().utc().isSameOrAfter(moment(new Date(startedArray[i].table.started)))
+                    && !moment().utc().isSameOrAfter(moment(new Date(startedArray[i].table.clock))) && startedArray[i].table.scoreBoardOpen) {
+                    if (!startedTables.current.map(el => el.key).includes(startedArray[i].key)) {
+                        let newObj = {
+                            key: startedArray[i].key, interval: setInterval(scoreBoardIntervalFunc, 1000, startedArray[i].table, startedArray[i].key)
                         };
                         startedTables.current.push(newObj);
                     }
@@ -495,24 +290,46 @@ function GameTablesDialog() {
     const cardAction = (key, table) => {
         if (table.authorUid === user.uid) {
             return (
-                <Tooltip title="Delete table" placement="bottom">
-                    <span>
-                        <IconButton onClick={() => handleTableDelete(key, table)} disabled={table.started !== undefined}>
-                            <DeleteOutline />
-                        </IconButton>
-                    </span>
-                </Tooltip>
+                <div>
+                    <Tooltip title="Delete table" placement="bottom">
+                        <span>
+                            <IconButton onClick={() => handleTableDelete(key, table)} disabled={table.started !== undefined}>
+                                <DeleteOutline />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Open Scoreboard" placement="bottom">
+                        <span>
+                            <IconButton onClick={() => dispatch(toggleScoreboard({ key: key, value: true }))}
+                                disabled={table.scoreBoardOpen || table.started === undefined || !moment().utc().isSameOrAfter(moment(new Date(table.started)))}>
+                                <Poll />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </div>
+
             );
         }
         if (table.authorUid !== user.uid) {
             return (
-                <Tooltip title="Leave table" placement="bottom">
-                    <span>
-                        <IconButton onClick={() => handleTableLeave(key, table)} disabled={table.started !== undefined}>
-                            <DirectionsRun />
-                        </IconButton>
-                    </span>
-                </Tooltip>
+                <div>
+                    <Tooltip title="Leave table" placement="bottom">
+                        <span>
+                            <IconButton onClick={() => handleTableLeave(key, table)} disabled={table.started !== undefined}>
+                                <DirectionsRun />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                    <Tooltip title="Open Scoreboard" placement="bottom">
+                        <span>
+                            <IconButton onClick={() => dispatch(toggleScoreboard({ key: key, value: true }))}
+                                disabled={table.scoreBoardOpen || table.started === undefined || !moment().utc().isSameOrAfter(moment(new Date(table.started)))}>
+                                <Poll />
+                            </IconButton>
+                        </span>
+                    </Tooltip>
+                </div>
+
             );
         }
     };
@@ -534,8 +351,14 @@ function GameTablesDialog() {
             dispatch(setSnackbarSeverity('warning'));
             dispatch(toggleSnackbarOpen(true));
         }
+        else if (lockCards.current) {
+            dispatch(setSnackbarMessage('You already played a card, wait you next turn. Thanks'));
+            dispatch(setSnackbarSeverity('warning'));
+            dispatch(toggleSnackbarOpen(true));
+        }
         else {
             if (mayIPlayThisCard(table, card)) {
+                lockCards.current = true;
                 let filter = startedTables.current.filter(el => el.key === key);
                 if (filter.length > 0) {
                     clearInterval(filter[0].interval);
@@ -543,9 +366,33 @@ function GameTablesDialog() {
                     dispatch(resetGameTablesDialogCountdowns(key));
                 }
 
-                let newTurnIndex = (table.turnIndex + 1) % table.players;
-                let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
-                playCardPassTurnAndCleanAbsence(key, table.round, table.subRound, card, newTurnIndex, newClock)
+                playCardAndCleanAbsence(key, table.round, table.subRound, card)
+                    .then(() => {
+                        setTimeout(() => {
+                            if (table.playedCards[table.round].flat().filter(card => card === -1).length === 1) {
+                                let newClock = moment().add(SCOREBOARD_TIME, 'seconds').utc().toString();
+                                openScoreBoard(key, newClock)
+                                    .then(() => {
+                                        lockCards.current = false;
+                                    })
+                                    .catch(error => {
+                                        // retry until is done
+                                    });
+                            }
+                            else {
+                                let newTurnIndex = (table.turnIndex + 1) % table.players;
+                                let newClock = moment().add(table.timePlay, 'seconds').utc().toString();
+                                passTurn(key, table.round, table.subRound, newTurnIndex, newClock)
+                                    .then(() => {
+                                        lockCards.current = false;
+                                    })
+                                    .catch(error => {
+                                        // retry until is done
+                                    });
+                            }
+
+                        }, calculateTimeBeforePassingTurn(table));
+                    })
                     .catch(error => {
                         dispatch(setSnackbarMessage('Error while playing the card. Try to select card again. Thanks'));
                         dispatch(setSnackbarSeverity('error'));
@@ -752,16 +599,18 @@ function GameTablesDialog() {
                 onClose={handleClose}
                 TransitionComponent={Transition}
                 keepMounted>
-                <AppBar className={classes.appBar}>
-                    <Toolbar>
-                        <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
-                            <Close />
-                        </IconButton>
-                        <Typography variant="h6" className={classes.title}>
-                            Game Tables
+                <ElevationScroll {...props}>
+                    <AppBar>
+                        <Toolbar>
+                            <IconButton edge="start" color="inherit" onClick={handleClose} aria-label="close">
+                                <Close />
+                            </IconButton>
+                            <Typography variant="h6" className={classes.title}>
+                                Game Tables
                         </Typography>
-                    </Toolbar>
-                </AppBar>
+                        </Toolbar>
+                    </AppBar>
+                </ElevationScroll>
                 {tables && user && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).map(([key, table], i) => (
 
                     <div className={clsx(classes.cardDiv, i === 0 ? classes.firstCardDiv : null)} key={key}>
@@ -789,7 +638,7 @@ function GameTablesDialog() {
                                         <CircularProgress className={classes.circularCountdown} variant="static" size='4em' value={countdowns.filter(el => el.key === key).length > 0 ?
                                             100 - (countdowns.filter(el => el.key === key)[0].value * 10 / 6) : 0} />
                                         <Typography className={classes.circularLabel} variant="body1" >{countdowns.filter(el => el.key === key).length > 0 ?
-                                            countdowns.filter(el => el.key === key)[0].value : 0}s
+                                            countdowns.filter(el => el.key === key)[0].value : 0}''
                                         </Typography>
                                     </div>}
                                 {!table.started && !moment().utc().isSameOrAfter(moment(new Date(table.started))) &&
@@ -825,7 +674,7 @@ function GameTablesDialog() {
                                     table.declarations[table.round][table.turnIndex] === -1 &&
                                     <div className={classes.declarationDiv}>
                                         {/* DECLARATIONS */}
-                                        <Typography className={classes.declarationText} variant="body1" >How many rounds you will win?</Typography>
+                                        <Typography className={classes.declarationText} variant="body1" >It's your turn! How many rounds you will win?</Typography>
                                         <div className={classes.declarationCheckboxDiv}>
                                             {getAvailableDeclarations(table).map((index) => (
                                                 <FormControlLabel
@@ -844,6 +693,26 @@ function GameTablesDialog() {
                                             ))}
                                         </div>
                                     </div>}
+                                {table.started && moment().utc().isSameOrAfter(moment(new Date(table.started))) && table.turnIndex !== table.participants.indexOf(user.uid) &&
+                                    table.declarations[table.round].includes(-1) &&
+                                    <div className={classes.declarationDiv}>
+                                        {/* OTHER PLAYERS DECLARATIONS */}
+                                        {table.participants.filter(uid => table.turnIndex === table.participants.indexOf(uid))
+                                            .map((uid, i) => (
+                                                <div key={i} className={classes.otherDeclarationDiv}>
+                                                    {(!userDetails || !getUserDetailsByUid(uid).photoURL) &&
+                                                        <Avatar key={i} className={classes.otherDeclarationAvatar}>
+                                                            <Face color="primary" className={classes.avatarIcon} />
+                                                        </Avatar>}
+                                                    {userDetails && getUserDetailsByUid(uid).photoURL &&
+                                                        <Avatar src={getUserDetailsByUid(uid).photoURL} className={classes.otherDeclarationAvatar} />
+                                                    }
+                                                    {userDetails &&
+                                                        <Typography className={classes.otherDeclarationText}>It's {getUserDetailsByUid(uid).displayName} turn. Please, wait...</Typography>}
+                                                </div>
+                                            ))}
+
+                                    </div>}
                                 {table.started && moment().utc().isSameOrAfter(moment(new Date(table.started))) && !table.declarations[table.round].includes(-1) &&
                                     <div className={classes.playedCardsDiv}>
                                         {/* PLAYED CARDS */}
@@ -851,8 +720,21 @@ function GameTablesDialog() {
                                             <img key={card} src={playCardImages[card + '.jpg']} alt="card"
                                                 className={classes.playedCardImage} />
                                         ))}
+                                        {/* WINNER NAME */}
+                                        {userDetails && table.playedCards[table.round][table.subRound].every(card => card !== -1) &&
+                                            <Typography className={classes.winnerNameText}>
+                                                {getUserDetailsByUid(table.participants[determinateSubTurnWinnerIndex(table)]).displayName} wins!
+                                            </Typography>
+                                        }
                                     </div>
                                 }
+                                {userDetails && openScoreboard && table.started && moment().utc().isSameOrAfter(moment(new Date(table.started))) &&
+                                    (table.scoreBoardOpen || (openScoreboard.filter(el => el.key === key).length > 0 ? openScoreboard.filter(el => el.key === key)[0].value : false)) &&
+
+                                    <div className={classes.scoreBoardDiv}>
+                                        {/* SCOREBOARD */}
+                                        <Scoreboard id={key} table={table} userDetails={userDetails} />
+                                    </div>}
                                 {/* PLAYERS AVATAR */}
                                 <div>
                                     {table.participants.map((uid, i) => (

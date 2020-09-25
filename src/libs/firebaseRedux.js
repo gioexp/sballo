@@ -3,6 +3,7 @@ import { firebaseConfig } from '../firebaseConfig';
 import { setTables } from '../components/HallPage/HallPageAction';
 import { setUserLoggedIn, setUserDetails } from '../components/LoginDialog/LoginDialogAction';
 import { determinateSubTurnWinnerIndex } from './gameLogic';
+import moment from 'moment';
 
 export const initFirebaseRedux = (dispatch) => {
     firebase.initializeApp(firebaseConfig);
@@ -103,32 +104,92 @@ export const declarePassTurnAndCleanAbsence = (id, round, playerIndex, declarati
     });
 }
 
-export const playCardPassTurnAndCleanAbsence = (id, round, subRound, card, newTurnIndex, newClock) => {
+// export const playCardPassTurnAndCleanAbsence = (id, round, subRound, card, newTurnIndex, newClock) => {
+//     const rootRef = firebase.database().ref();
+//     const childRef = rootRef.child('tables/' + id);
+//     return childRef.transaction(function update(table) {
+//         if (table) {
+//             table.playedCards[round][subRound][table.playedCards[round][subRound].indexOf(-1)] = card;
+//             table.turnIndex = newTurnIndex;
+//             table.clock = newClock;
+//             if (table.absencePlayerManager) delete table.absencePlayerManager;
+
+//             if (table.playedCards[round][subRound].every(card => card !== -1)) {
+//                 // everybody played their cards, now determinate who won 
+//                 let winnerIndex = determinateSubTurnWinnerIndex(table);
+//                 table.points[table.round][winnerIndex]++;
+//                 // change subRound
+//                 if (subRound === (table.shifts[round][0].length - 1)) {
+//                     table.subRound = 0;
+//                     table.round++;
+//                     table.initialTurnIndex = (table.initialTurnIndex + 1) % table.players;
+//                     table.turnIndex = table.initialTurnIndex;
+//                 }
+//                 else {
+//                     table.turnIndex = winnerIndex;
+//                     table.subRound++;
+//                 }
+//             }
+//         }
+//         return table;
+//     });
+// }
+
+export const playCardAndCleanAbsence = (id, round, subRound, card) => {
     const rootRef = firebase.database().ref();
     const childRef = rootRef.child('tables/' + id);
     return childRef.transaction(function update(table) {
         if (table) {
             table.playedCards[round][subRound][table.playedCards[round][subRound].indexOf(-1)] = card;
-            table.turnIndex = newTurnIndex;
-            table.clock = newClock;
+            table.clock = moment().utc().toString(); // set to now to momentary stop countdowns
             if (table.absencePlayerManager) delete table.absencePlayerManager;
 
             if (table.playedCards[round][subRound].every(card => card !== -1)) {
                 // everybody played their cards, now determinate who won 
                 let winnerIndex = determinateSubTurnWinnerIndex(table);
-                table.points[table.round][winnerIndex]++;
-                // change subRound
+                table.points[round][winnerIndex]++;
+            }
+        }
+        return table;
+    });
+}
+
+export const passTurn = (id, round, subRound, newTurnIndex, newClock) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id);
+    return childRef.transaction(function update(table) {
+        if (table) {
+            table.turnIndex = newTurnIndex;
+            table.clock = newClock;
+            if (table.playedCards[round][subRound].every(card => card !== -1)) {
+                // change round and subRound
                 if (subRound === (table.shifts[round][0].length - 1)) {
                     table.subRound = 0;
                     table.round++;
                     table.initialTurnIndex = (table.initialTurnIndex + 1) % table.players;
                     table.turnIndex = table.initialTurnIndex;
+                    table.scoreBoardOpen = false;
+                    // if the last player does not close the scoreBoard, absencePlayerManager does but need to clear his value after ruond change
+                    if (table.absencePlayerManager) delete table.absencePlayerManager; 
                 }
                 else {
+                    let winnerIndex = determinateSubTurnWinnerIndex(table);
                     table.turnIndex = winnerIndex;
                     table.subRound++;
                 }
             }
+        }
+        return table;
+    });
+}
+
+export const openScoreBoard = (id, newClock) => {
+    const rootRef = firebase.database().ref();
+    const childRef = rootRef.child('tables/' + id);
+    return childRef.transaction(function update(table) {
+        if (table) {
+            table.scoreBoardOpen = true;
+            table.clock = newClock;
         }
         return table;
     });

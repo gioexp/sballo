@@ -1,36 +1,9 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import {
     AppBar, Toolbar, Typography, IconButton
 } from '@material-ui/core';
-import FacebookIcon from '@material-ui/icons/Facebook';
-import TwitterIcon from '@material-ui/icons/Twitter';
-
-const useStyles = makeStyles((theme) => ({
-    centered: {
-        alignItems: 'center',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    infoText: {
-        fontStyle: 'oblique',
-        fontSize: '0.9em'
-    },
-    followDiv: {
-        position: 'absolute',
-        right: '-40em',
-        display: 'inline-flex',
-    },
-    followText: {
-        fontStyle: 'oblique',
-        fontSize: '0.9em',
-        marginTop: '0.95em',
-        marginRight: '1em'
-    },
-    emoji: {
-        fontStyle: 'normal',
-    }
-}));
+import { Facebook, Twitter } from '@material-ui/icons';
+import { useStyles } from './FooterCss';
 
 function Footer() {
     const classes = useStyles();
@@ -47,10 +20,10 @@ function Footer() {
                             Follow us:
                         </Typography>
                         <IconButton edge="start" color="inherit">
-                            <FacebookIcon />
+                            <Facebook />
                         </IconButton>
                         <IconButton edge="start" color="inherit">
-                            <TwitterIcon />
+                            <Twitter />
                         </IconButton>
                     </div>
                 </Toolbar>

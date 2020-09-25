@@ -3,15 +3,8 @@ import MuiSnackbar from '@material-ui/core/Snackbar';
 import MuiAlert from '@material-ui/lab/Alert';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleSnackbarOpen } from './SnackbarAction';
-import { makeStyles } from '@material-ui/core/styles';
 import { Hidden } from '@material-ui/core';
-
-const useStyles = makeStyles((theme) => ({
-    root: {
-        top: '9.5%',
-        width: '15%'
-    },
-}));
+import { useStyles } from './SnackbarCss';
 
 function Alert(props) {
     return <MuiAlert elevation={6} variant='filled' {...props} />;

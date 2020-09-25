@@ -3,46 +3,13 @@ import {
     Button, Dialog, DialogActions, DialogContent, DialogTitle, Slide, LinearProgress, Typography, FormControl, FormControlLabel,
     TextField, FormHelperText
 } from '@material-ui/core';
-import { makeStyles } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleLoginDialog } from './LoginDialogAction';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import clsx from 'clsx';
 import { VALID_EMAIL, VALID_PASSWORD, NICKNAME_MIN_LENGTH, NICKNAME_MAX_LENGTH, USER_NOT_FOUND, WRONG_PASSWORD, START_POINTS } from '../../libs/constants';
 import { createUser, updateUserProfile, sendEmailVerification, login, sendPasswordResetEmail, insertFirebase } from '../../libs/firebaseRedux';
-
-const useStyles = makeStyles((theme) => ({
-    title: {
-        color: theme.palette.primary.main,
-    },
-    actionButton: {
-        textTransform: 'none'
-    },
-    loadingBar: {
-        width: '100%',
-    },
-    formControl: {
-        width: '100%',
-    },
-    emailMarginBottom: {
-        marginBottom: '1em'
-    },
-    passwordMarginBottom: {
-        marginBottom: '2em'
-    },
-    textField: {
-        width: '100%',
-        marginRight: 0,
-        marginLeft: 0
-    },
-    signInDiv: {
-        display: 'inline-flex',
-        alignItems: 'center'
-    },
-    newPasswordMarginBottom: {
-        marginBottom: '1em'
-    }
-}));
+import { useStyles } from './LoginDialogCss';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="left" ref={ref} {...props} />;
