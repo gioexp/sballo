@@ -5,7 +5,7 @@ import {
 } from '@material-ui/core';
 import { useSelector, useDispatch } from 'react-redux';
 import { toggleCreateTableDialog } from './CreateTableDialogAction';
-import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH, PLAYERS_VALUES, TIME_VALUES } from '../../libs/constants';
+import { TABLENAME_MAX_LENGTH, TABLENAME_MIN_LENGTH, PLAYERS_VALUES, TIME_VALUES, MAX_TABLES_PER_PLAYER } from '../../libs/constants';
 import clsx from 'clsx';
 import { insertFirebase } from '../../libs/firebaseRedux';
 import moment from 'moment';
@@ -22,6 +22,7 @@ function CreateTableDialog() {
     const open = useSelector(state => state.CreateTableDialogReducer.open);
     const user = useSelector(state => state.LoginDialogReducer.user);
     const userDetails = useSelector(state => state.LoginDialogReducer.userDetails);
+    const tables = useSelector(state => state.HallPageReducer.tables);
     const dispatch = useDispatch();
     const [tableName, setTableName] = useState('My Sballo table');
     const [players, setPlayers] = useState(4);
@@ -41,33 +42,42 @@ function CreateTableDialog() {
     };
 
     const handleCreate = () => {
-        setLoading(true);
-        let newTable = {
-            timestamp: moment.utc().toString(),
-            type: 'sballo',
-            name: tableName,
-            bet: bet,
-            timePlay: timeToPlay,
-            players: players,
-            participants: [user.uid],
-            author: user.displayName,
-            authorUid: user.uid
-        };
-        insertFirebase('tables', newTable)
-            .then(result => {
-                dispatch(setSnackbarMessage('Table created!'));
-                dispatch(setSnackbarSeverity('success'));
-                dispatch(toggleSnackbarOpen(true));
-                dispatch(toggleCreateTableDialog(false));
-                setLoading(false);
-            })
-            .catch(error => {
-                dispatch(setSnackbarMessage('Error while creating table. Retry later...'));
-                dispatch(setSnackbarSeverity('error'));
-                dispatch(toggleSnackbarOpen(true));
-                dispatch(toggleCreateTableDialog(false));
-                setLoading(false);
-            });
+        if (Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length < MAX_TABLES_PER_PLAYER) {
+            setLoading(true);
+            let newTable = {
+                timestamp: moment.utc().toString(),
+                type: 'sballo',
+                name: tableName,
+                bet: bet,
+                timePlay: timeToPlay,
+                players: players,
+                participants: [user.uid],
+                author: user.displayName,
+                authorUid: user.uid
+            };
+            insertFirebase('tables', newTable)
+                .then(result => {
+                    dispatch(setSnackbarMessage('Table created!'));
+                    dispatch(setSnackbarSeverity('success'));
+                    dispatch(toggleSnackbarOpen(true));
+                    dispatch(toggleCreateTableDialog(false));
+                    setLoading(false);
+                })
+                .catch(error => {
+                    dispatch(setSnackbarMessage('Error while creating table. Retry later...'));
+                    dispatch(setSnackbarSeverity('error'));
+                    dispatch(toggleSnackbarOpen(true));
+                    dispatch(toggleCreateTableDialog(false));
+                    setLoading(false);
+                });
+        }
+        else {
+            dispatch(setSnackbarMessage('You cannot join more than ' + MAX_TABLES_PER_PLAYER + ' tables at the same time! Sorry'));
+            dispatch(setSnackbarSeverity('warning'));
+            dispatch(toggleSnackbarOpen(true));
+            dispatch(toggleCreateTableDialog(false));
+            setLoading(false);
+        }
     };
 
     const handlePlayersChange = (event) => {

@@ -7,6 +7,7 @@ import { toggleTableConfirmDialog } from './TableConfirmDialogAction';
 import { insertTableParticipantsFirebase, deleteFirebase, removeTableParticipantsFirebase } from '../../libs/firebaseRedux';
 import { toggleSnackbarOpen, setSnackbarMessage, setSnackbarSeverity } from '../Snackbar/SnackbarAction';
 import { useStyles } from './TableConfirmDialogCss';
+import { MAX_TABLES_PER_PLAYER } from '../../libs/constants';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -29,28 +30,36 @@ function TableConfirmDialog() {
 
     const joinTable = () => {
         if (tables[id].participants.length < tables[id].players) {
-            setLoading(true);
-            insertTableParticipantsFirebase(id, user.uid, tables[id].players)
-                .then(result => {
-                    if (result.committed) {
-                        dispatch(setSnackbarMessage('Table joined. Good luck!'));
-                        dispatch(setSnackbarSeverity('success'));
-                    }
-                    else {
-                        dispatch(setSnackbarMessage('Table is full. Try with another one.'));
-                        dispatch(setSnackbarSeverity('warning'));
-                    }
-                    dispatch(toggleSnackbarOpen(true));
-                    dispatch(toggleTableConfirmDialog(false));
-                    setLoading(false);
-                })
-                .catch(error => {
-                    dispatch(setSnackbarMessage('Error while joining table. Retry later...'));
-                    dispatch(setSnackbarSeverity('error'));
-                    dispatch(toggleSnackbarOpen(true));
-                    dispatch(toggleTableConfirmDialog(false));
-                    setLoading(false);
-                });
+            if (Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length < MAX_TABLES_PER_PLAYER) {
+                setLoading(true);
+                insertTableParticipantsFirebase(id, user.uid, tables[id].players)
+                    .then(result => {
+                        if (result.committed) {
+                            dispatch(setSnackbarMessage('Table joined. Good luck!'));
+                            dispatch(setSnackbarSeverity('success'));
+                        }
+                        else {
+                            dispatch(setSnackbarMessage('Table is full. Try with another one.'));
+                            dispatch(setSnackbarSeverity('warning'));
+                        }
+                        dispatch(toggleSnackbarOpen(true));
+                        dispatch(toggleTableConfirmDialog(false));
+                        setLoading(false);
+                    })
+                    .catch(error => {
+                        dispatch(setSnackbarMessage('Error while joining table. Retry later...'));
+                        dispatch(setSnackbarSeverity('error'));
+                        dispatch(toggleSnackbarOpen(true));
+                        dispatch(toggleTableConfirmDialog(false));
+                        setLoading(false);
+                    });
+            }
+            else {
+                dispatch(setSnackbarMessage('You cannot join more than ' + MAX_TABLES_PER_PLAYER + ' tables at the same time! Sorry'));
+                dispatch(setSnackbarSeverity('warning'));
+                dispatch(toggleSnackbarOpen(true));
+                dispatch(toggleTableConfirmDialog(false));
+            }
         }
         else {
             dispatch(setSnackbarMessage('Table is full. Try with another one.'));

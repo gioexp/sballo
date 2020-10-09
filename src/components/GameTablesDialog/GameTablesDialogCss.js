@@ -1,6 +1,6 @@
 import { makeStyles } from '@material-ui/core/styles';
 import PokerTable from '../../images/poker_table.jpg';
-import { green, grey, yellow } from '@material-ui/core/colors';
+import { green, grey, yellow, red } from '@material-ui/core/colors';
 
 export const useStyles = makeStyles((theme) => ({
     title: {
@@ -79,14 +79,14 @@ export const useStyles = makeStyles((theme) => ({
     },
     bottomRight: {
         marginLeft: '22%',
-        marginTop: '6.5%'
+        marginTop: '7%'
     },
     bottom: {
-        marginTop: '-4.7%'
+        marginTop: '-4.65%'
     },
     bottomLeft: {
         marginLeft: '-22%',
-        marginTop: '-4.7%'
+        marginTop: '-4.65%'
     },
     avatarName: {
         backgroundColor: theme.palette.primary.main,
@@ -101,6 +101,14 @@ export const useStyles = makeStyles((theme) => ({
     avatarCircularProgress: {
         position: 'absolute',
         marginTop: '-0.1%',
+    },
+    red: {
+        color: red[700]
+    },
+    yellow: {
+        color: yellow[700]
+    },
+    grey: {
         color: grey[500]
     },
     declarationIconDiv: {
@@ -226,23 +234,23 @@ export const useStyles = makeStyles((theme) => ({
         marginLeft: '59%'
     },
     round0Bottom: {
-        marginTop: '28.3%',
+        marginTop: '28.5%',
         marginLeft: '43.5%'
     },
     round1Bottom: {
-        marginTop: '28.3%',
+        marginTop: '28.5%',
         marginLeft: '41.5%'
     },
     round2Bottom: {
-        marginTop: '28.3%',
+        marginTop: '28.5%',
         marginLeft: '40%'
     },
     round3Bottom: {
-        marginTop: '28.3%',
+        marginTop: '28.5%',
         marginLeft: '38.2%'
     },
     round4Bottom: {
-        marginTop: '28.3%',
+        marginTop: '28.5%',
         marginLeft: '36.5%'
     },
     round0BottomLeft: {
@@ -354,5 +362,116 @@ export const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         zIndex: 1,
         backgroundColor: 'rgba(0, 0, 0, 0.54)',
-    }
+    },
+    otherPlayerCardImageDiv: {
+        position: 'absolute',
+        display: 'flex',
+        width: '93.3%',
+    },
+    otherPlayerCardImage: {
+        width: '100%'
+    },
+
+    otherPlayerCardPositionLeftFirstRound0: {
+        marginTop: '14.2%',
+        marginLeft: '23.8%',
+        width: '2%'
+    },
+    otherPlayerCardPositionLeftFirstRound1: {
+        marginTop: '14.2%',
+        marginLeft: '23.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionLeftFirstRound2: {
+        marginTop: '14.2%',
+        marginLeft: '22.6%',
+        width: '2%'
+    },
+    otherPlayerCardPositionLeftFirstRound3: {
+        marginTop: '14.2%',
+        marginLeft: '22%',
+        width: '2%'
+    },
+    otherPlayerCardPositionLeftFirstRound4: {
+        marginTop: '14.2%',
+        marginLeft: '21.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionLeft: {
+        marginTop: '14.2%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+
+    otherPlayerCardPositionTopLeftFirst: {
+        marginTop: '2%',
+        marginLeft: '41.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionTopLeft: {
+        marginTop: '2%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionTopFirst: {
+        marginTop: '2%',
+        marginLeft: '52.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionTop: {
+        marginTop: '2%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+
+    otherPlayerCardPositionTopRightFirst: {
+        marginTop: '2%',
+        marginLeft: '63.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionTopRight: {
+        marginTop: '2%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionRightFirst: {
+        width: '2%',
+        marginTop: '14.2%',
+        marginLeft: '73.4%'
+    },
+    otherPlayerCardPositionRight: {
+        marginTop: '14.2%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottomRightFirst: {
+        marginTop: '25.8%',
+        marginLeft: '63.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottomRight: {
+        marginTop: '25.8%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottomFirst: {
+        marginTop: '25.8%',
+        marginLeft: '52.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottom: {
+        marginTop: '25.8%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottomLeftFirst: {
+        marginTop: '25.8%',
+        marginLeft: '41.2%',
+        width: '2%'
+    },
+    otherPlayerCardPositionBottomLeft: {
+        marginTop: '25.8%',
+        marginLeft: '-1.4%',
+        width: '2%'
+    },
 }));

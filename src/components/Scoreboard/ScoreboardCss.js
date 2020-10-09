@@ -86,8 +86,14 @@ export const useStyles = makeStyles((theme) => ({
         color: brown[500]
     },
     rankIconDiv: {
-        marginTop: '1.6%',
-        marginLeft: '1.8%'
+        marginLeft: '1%',
+        padding: '0.5em',
+        textAlign: 'center',
+        color: 'black',
+        height: '100%',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center'
     },
     closeButton: {
         position: 'absolute',

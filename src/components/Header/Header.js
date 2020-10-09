@@ -1,7 +1,7 @@
 import React, { useState, useRef, cloneElement, useEffect } from 'react';
 import {
     AppBar, Toolbar, Typography, Button, IconButton, Tabs, Tab, Avatar, Popper, Grow, Paper,
-    ClickAwayListener, MenuList, MenuItem, Divider, CircularProgress, Hidden, useScrollTrigger, Tooltip
+    ClickAwayListener, MenuList, MenuItem, Divider, CircularProgress, Hidden, useScrollTrigger, Tooltip, Fade
 } from '@material-ui/core';
 import { AttachMoney, AlternateEmail, SyncAlt, Face, Add, VideogameAsset } from '@material-ui/icons';
 import { Routes } from '../../libs/constants';
@@ -38,7 +38,7 @@ function Header(props) {
 
     useEffect(() => {
         // select tab in case of refresh
-        switch(history.location.pathname) {
+        switch (history.location.pathname) {
             case Routes.HallPage.pathname:
                 setTabIndex(0);
                 break;
@@ -166,56 +166,66 @@ function Header(props) {
             <ElevationScroll {...props}>
                 <AppBar color="primary">
                     <Toolbar>
-                        <IconButton edge="start" className={classes.homeButton} color="inherit" aria-label="menu"
-                            onClick={homeButtonClick} disableRipple disableTouchRipple>
-                            <div className={classes.homeButtonDiv}>
-                                <AttachMoney fontSize="large" />
-                                <Typography variant="h6" className={classes.bLetter}>b</Typography>
-                                <AlternateEmail fontSize="small" className={classes.AlternateEmailIcon} />
-                                <SyncAlt fontSize="default" className={classes.SyncAltIcon} />
-                                <Typography variant="h6" className={classes.oLetter}>o</Typography>
-                            </div>
-                        </IconButton>
+                        <Fade in={true}>
+                            <IconButton edge="start" className={classes.homeButton} color="inherit" aria-label="menu"
+                                onClick={homeButtonClick} disableRipple disableTouchRipple>
+                                <div className={classes.homeButtonDiv}>
+                                    <AttachMoney fontSize="large" />
+                                    <Typography variant="h6" className={classes.bLetter}>b</Typography>
+                                    <AlternateEmail fontSize="small" className={classes.AlternateEmailIcon} />
+                                    <SyncAlt fontSize="default" className={classes.SyncAltIcon} />
+                                    <Typography variant="h6" className={classes.oLetter}>o</Typography>
+                                </div>
+                            </IconButton>
+                        </Fade>
+
                         <Hidden smDown>
-                            <div className={classes.navArea}>
-                                <Tabs value={tabIndex} onChange={changeTabIndex}
-                                    classes={{
-                                        indicator: classes.TabsIndicator,
-                                        flexContainer: classes.TabsFlexContainer
-                                    }}
-                                    centered>
-                                    <Tab disableRipple label="Hall"
-                                        className={classes.Tab}
-                                        classes={TabClasses} />
-                                    <Tab disableRipple label="Shop"
-                                        className={classes.Tab}
-                                        classes={TabClasses} />
-                                    <Tab disableRipple label="Settings"
-                                        className={classes.Tab}
-                                        classes={TabClasses} />
-                                    <Tab disableRipple label="Credits"
-                                        className={classes.Tab}
-                                        classes={TabClasses} />
-                                    <Tab disableRipple label="Contact us"
-                                        className={classes.Tab}
-                                        classes={TabClasses} />
-                                </Tabs>
-                            </div>
+                            <Fade in={true}>
+                                <div className={classes.navArea}>
+                                    <Tabs value={tabIndex} onChange={changeTabIndex}
+                                        classes={{
+                                            indicator: classes.TabsIndicator,
+                                            flexContainer: classes.TabsFlexContainer
+                                        }}
+                                        centered>
+                                        <Tab disableRipple label="Hall"
+                                            className={classes.Tab}
+                                            classes={TabClasses} />
+                                        <Tab disableRipple label="Shop"
+                                            className={classes.Tab}
+                                            classes={TabClasses} />
+                                        <Tab disableRipple label="Settings"
+                                            className={classes.Tab}
+                                            classes={TabClasses} />
+                                        <Tab disableRipple label="Credits"
+                                            className={classes.Tab}
+                                            classes={TabClasses} />
+                                        <Tab disableRipple label="Contact us"
+                                            className={classes.Tab}
+                                            classes={TabClasses} />
+                                    </Tabs>
+                                </div>
+                            </Fade>
+
                             <div>
                                 {!user &&
-                                    <Button disableRipple color="inherit" className={classes.login} onClick={loginButtonClick}>
-                                        Login
-                                    </Button>}
+                                    <Fade in={true}>
+                                        <Button disableRipple color="inherit" className={classes.login} onClick={loginButtonClick}>
+                                            Login
+                                        </Button>
+                                    </Fade>}
                                 {user &&
                                     <div>
-                                        <IconButton onClick={userButtonClick} ref={userButtonRef}>
-                                            {!user.photoURL &&
-                                                <Avatar className={user.emailVerified ? classes.white : classes.grey}>
-                                                    <Face color="primary" fontSize="large" />
-                                                </Avatar>}
-                                            {user.photoURL && imageLoaded && <Avatar src={user.photoURL} />}
-                                            {user.photoURL && !imageLoaded && <CircularProgress className={classes.circularProgress} size={'1.65em'} />}
-                                        </IconButton>
+                                        <Fade in={true}>
+                                            <IconButton onClick={userButtonClick} ref={userButtonRef}>
+                                                {!user.photoURL &&
+                                                    <Avatar className={user.emailVerified ? classes.white : classes.grey}>
+                                                        <Face color="primary" fontSize="large" />
+                                                    </Avatar>}
+                                                {user.photoURL && imageLoaded && <Avatar src={user.photoURL} />}
+                                                {user.photoURL && !imageLoaded && <CircularProgress className={classes.circularProgress} size={'1.65em'} />}
+                                            </IconButton>
+                                        </Fade>
                                         <Popper open={openUserMenu} anchorEl={userButtonRef.current} role={undefined} transition disablePortal className={classes.popper}>
                                             {({ TransitionProps, placement }) => (
                                                 <Grow
@@ -237,19 +247,23 @@ function Header(props) {
                             </div>
                             {history.location.pathname === Routes.HallPage.pathname &&
                                 <div>
-                                    <Tooltip title="Create new table" placement="right">
-                                        <Button variant="outlined" color="primary" className={classes.addButton}
-                                            onClick={addButtonClick}>
-                                            <Add fontSize="large" className={classes.addIcon} />
-                                        </Button>
-                                    </Tooltip>
-                                    {tables && user && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
-                                        <Tooltip title="Go to game tables" placement="right">
-                                            <Button variant="outlined" color="primary" className={classes.gameTablesButton}
-                                                onClick={openGameTables}>
-                                                <VideogameAsset fontSize="large" className={classes.gameTablesIcon} />
+                                    <Fade in={true}>
+                                        <Tooltip title="Create new table" placement="right">
+                                            <Button variant="outlined" color="primary" className={classes.addButton}
+                                                onClick={addButtonClick}>
+                                                <Add fontSize="large" className={classes.addIcon} />
                                             </Button>
-                                        </Tooltip>}
+                                        </Tooltip>
+                                    </Fade>
+                                    {tables && user && Object.entries(tables).filter(([key, table]) => table.participants.includes(user.uid)).length > 0 &&
+                                        <Fade in={true}>
+                                            <Tooltip title="Go to game tables" placement="right">
+                                                <Button variant="outlined" color="primary" className={classes.gameTablesButton}
+                                                    onClick={openGameTables}>
+                                                    <VideogameAsset fontSize="large" className={classes.gameTablesIcon} />
+                                                </Button>
+                                            </Tooltip>
+                                        </Fade>}
                                 </div>}
                         </Hidden>
                     </Toolbar>

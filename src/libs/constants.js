@@ -48,3 +48,6 @@ export const CLUBS_CARDS = [26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38];
 export const SPADES_CARDS = [39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51];
 
 export const SCOREBOARD_TIME = 15; // secs
+export const MAX_CALL_RETRY = 10;
+
+export const MAX_TABLES_PER_PLAYER = 4;

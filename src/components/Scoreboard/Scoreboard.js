@@ -6,6 +6,7 @@ import clsx from 'clsx';
 import { useDispatch } from 'react-redux';
 import { toggleScoreboard } from './ScoreboardAction';
 import { useStyles } from './ScoreboardCss';
+import _ from 'lodash';
 
 function Scoreboard(props) {
     const { id, table, userDetails } = props;
@@ -35,7 +36,7 @@ function Scoreboard(props) {
                 }
             }
             if (result === 0) return "";
-            let stringResult = result > 0 ? "+" + result : String(result);
+            let stringResult = result >= 0 ? "+" + result : String(result);
             return stringResult;
         }
     };
@@ -47,25 +48,23 @@ function Scoreboard(props) {
             if (pointIndex <= table.round) result += Number(calculateRoundPoints(table.points[i][playerIndex], table.declarations[i][playerIndex]));
         }
 
-        if (result === 0) return "-";
-        let stringResult = result > 0 ? "+" + result : String(result);
+        if (result === 0 && pointIndex > table.round) return "-";
+        let stringResult = result >= 0 ? "+" + result : String(result);
         return stringResult;
     };
 
     const calculateRanking = (table, uidIndex) => {
-        if (table.round === 0) return -1;
-        else {
-            let results = [...Array(table.participants.length).fill(0)];
-            for (let i = 0; i < table.participants.length; i++) {
-                for (let j = 0; j < table.declarations.length; j++) {
-                    results[i] += Number(calculateRoundPoints(table.points[j][i], table.declarations[j][i]));
-                }
+        let results = [...Array(table.participants.length).fill(0)];
+        for (let i = 0; i < table.participants.length; i++) {
+            for (let j = 0; j < table.declarations.length; j++) {
+                results[i] += Number(calculateRoundPoints(table.points[j][i], table.declarations[j][i]));
             }
-            let myPoints = results[uidIndex];
-            let rank = results.indexOf(myPoints);
-            if (rank > 2) rank = -1;
-            return rank;
         }
+        let myPoints = results[uidIndex];
+        results = [...new Set(results)].sort((a, b) => b - a);
+        let rank = results.indexOf(myPoints);
+        if (rank > 2) rank = -1;
+        return rank;
     };
 
     const getRankingIconcolor = (rank) => {
@@ -83,6 +82,15 @@ function Scoreboard(props) {
 
     const handleCloseScoreboard = (key) => {
         dispatch(toggleScoreboard({ key: key, value: false }));
+    };
+
+    function sortParticipantsOnRanking(a, b) {
+        let rankA = calculateRanking(table, table.participants.indexOf(a));
+        let rankB = calculateRanking(table, table.participants.indexOf(b));
+        if (rankA !== -1 && rankB !== -1) return rankA - rankB;
+        if (rankA === -1 && rankB !== -1) return 1;
+        if (rankA !== -1 && rankB === -1) return -1;
+        return 0;
     };
 
     return (
@@ -106,42 +114,43 @@ function Scoreboard(props) {
                                 </React.Fragment>
                             </Grid>
 
-                            {table.participants.map((uid, uidIndex) => (
-                                <Grid key={uid} container className={classes.scoreRow}>
-                                    <React.Fragment>
-                                        <Grid item className={classes.playerNameItem}>
-                                            <Paper className={classes.roundPaper}>{getUserDetailsByUid(uid).displayName}</Paper>
-                                        </Grid>
-                                        {table.points.map((point, pointIndex) => (
-                                            <Grid key={pointIndex} item className={classes.pointItem}>
-                                                <Paper className={classes.pointPaper}>
-                                                    <div className={classes.pointPaperSummaryDiv}>
-                                                        {table.declarations[pointIndex][table.participants.indexOf(uid)] !== -1 &&
-                                                            <Typography variant="caption" className={classes.pointPaperText}>
-                                                                {point[table.participants.indexOf(uid)]}/{table.declarations[pointIndex][table.participants.indexOf(uid)]}
-                                                            </Typography>}
-                                                    </div>
-                                                    <div className={classes.pointPaperRoundPointsDiv}>
-                                                        <Typography variant="caption" className={clsx(classes.pointPaperText, calculateRoundPoints(point[table.participants.indexOf(uid)],
-                                                            table.declarations[pointIndex][table.participants.indexOf(uid)]).includes("+") ? classes.positiveResult : classes.negativeResult)}>
-                                                            {calculateRoundPoints(point[table.participants.indexOf(uid)], table.declarations[pointIndex][table.participants.indexOf(uid)])}
-                                                        </Typography>
-                                                    </div>
-                                                    <div>
-                                                        <Typography variant="h6" className={calculateTotalPoints(table, uid, pointIndex).includes("+") ? classes.positiveResult : classes.negativeResult}>
-                                                            {calculateTotalPoints(table, uid, pointIndex)}
-                                                        </Typography>
-                                                    </div>
-                                                </Paper>
+                            {_.cloneDeep(table.participants).sort(sortParticipantsOnRanking)
+                                .map((uid, uidIndex) => (
+                                    <Grid key={uid} container className={classes.scoreRow}>
+                                        <React.Fragment>
+                                            <Grid item className={classes.playerNameItem}>
+                                                <Paper className={classes.roundPaper}>{getUserDetailsByUid(uid).displayName}</Paper>
                                             </Grid>
-                                        ))}
-                                        {calculateRanking(table, uidIndex) !== -1 &&
-                                            <div className={classes.rankIconDiv}>
-                                                <EmojiEvents fontSize="large" className={getRankingIconcolor(calculateRanking(table, uidIndex))} />
-                                            </div>}
-                                    </React.Fragment>
-                                </Grid>
-                            ))}
+                                            {table.points.map((point, pointIndex) => (
+                                                <Grid key={pointIndex} item className={classes.pointItem}>
+                                                    <Paper className={classes.pointPaper}>
+                                                        <div className={classes.pointPaperSummaryDiv}>
+                                                            {table.declarations[pointIndex][table.participants.indexOf(uid)] !== -1 &&
+                                                                <Typography variant="caption" className={classes.pointPaperText}>
+                                                                    {point[table.participants.indexOf(uid)]}/{table.declarations[pointIndex][table.participants.indexOf(uid)]}
+                                                                </Typography>}
+                                                        </div>
+                                                        <div className={classes.pointPaperRoundPointsDiv}>
+                                                            <Typography variant="caption" className={clsx(classes.pointPaperText, calculateRoundPoints(point[table.participants.indexOf(uid)],
+                                                                table.declarations[pointIndex][table.participants.indexOf(uid)]).includes("+") ? classes.positiveResult : classes.negativeResult)}>
+                                                                {calculateRoundPoints(point[table.participants.indexOf(uid)], table.declarations[pointIndex][table.participants.indexOf(uid)])}
+                                                            </Typography>
+                                                        </div>
+                                                        <div>
+                                                            <Typography variant="h6" className={calculateTotalPoints(table, uid, pointIndex).includes("+") ? classes.positiveResult : classes.negativeResult}>
+                                                                {calculateTotalPoints(table, uid, pointIndex)}
+                                                            </Typography>
+                                                        </div>
+                                                    </Paper>
+                                                </Grid>
+                                            ))}
+                                            {calculateRanking(table, table.participants.indexOf(uid)) !== -1 &&
+                                                <div className={classes.rankIconDiv}>
+                                                    <EmojiEvents fontSize="large" className={getRankingIconcolor(calculateRanking(table, table.participants.indexOf(uid)))} />
+                                                </div>}
+                                        </React.Fragment>
+                                    </Grid>
+                                ))}
                         </Grid>
                     </div>}
             </CardContent>
